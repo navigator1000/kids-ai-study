@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "Static Site (docs/)",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "-d", "docs"],
+      "port": 8000
+    }
+  ]
+}

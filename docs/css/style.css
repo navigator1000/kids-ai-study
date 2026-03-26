@@ -1,0 +1,816 @@
+/* ========================================
+   AI学習ナビ for Parents - メインCSS
+   全面リニューアル版
+   ======================================== */
+
+/* リセット・ベース */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "BIZ UDPGothic", "Meiryo", sans-serif;
+  color: #1E293B;
+  background: #ffffff;
+  line-height: 1.8;
+  -webkit-font-smoothing: antialiased;
+}
+
+img, svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+a {
+  color: #2563EB;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+ul {
+  list-style: none;
+}
+
+/* ========================================
+   ヘッダー
+   ======================================== */
+
+.site-header {
+  background: linear-gradient(135deg, #1E40AF 0%, #3B82F6 100%);
+  color: white;
+  padding: 0 20px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.site-header__inner {
+  max-width: 1080px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 60px;
+}
+
+.site-header__logo {
+  font-size: 18px;
+  font-weight: bold;
+  color: white;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.site-header__logo:hover {
+  text-decoration: none;
+  opacity: 0.9;
+}
+
+.site-header__nav {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.site-header__nav a {
+  color: rgba(255,255,255,0.9);
+  font-size: 14px;
+  font-weight: 500;
+  transition: color 0.2s;
+  white-space: nowrap;
+}
+
+.site-header__nav a:hover {
+  color: white;
+  text-decoration: none;
+}
+
+/* ハンバーガーメニュー */
+.hamburger {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 5px;
+  padding: 0;
+}
+
+.hamburger__line {
+  display: block;
+  width: 24px;
+  height: 2px;
+  background: white;
+  border-radius: 2px;
+  transition: transform 0.3s, opacity 0.3s;
+}
+
+.hamburger.is-open .hamburger__line:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.hamburger.is-open .hamburger__line:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger.is-open .hamburger__line:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+/* ========================================
+   ヒーローセクション
+   ======================================== */
+
+.hero {
+  position: relative;
+  min-height: 520px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background: url('https://images.unsplash.com/photo-1588072432836-e10032774350?w=1400&h=700&fit=crop') center center / cover no-repeat;
+  overflow: hidden;
+}
+
+.hero__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(30,64,175,0.82) 0%, rgba(59,130,246,0.72) 100%);
+}
+
+.hero__content {
+  position: relative;
+  z-index: 1;
+  max-width: 720px;
+  padding: 60px 24px;
+}
+
+.hero__title {
+  font-size: 36px;
+  color: #ffffff;
+  line-height: 1.45;
+  margin-bottom: 20px;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.hero__description {
+  font-size: 16px;
+  color: rgba(255,255,255,0.92);
+  max-width: 600px;
+  margin: 0 auto 32px;
+  line-height: 1.8;
+}
+
+.hero__cta {
+  display: inline-block;
+  background: #F97316;
+  color: #ffffff;
+  font-size: 17px;
+  font-weight: bold;
+  padding: 16px 48px;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: background-color 0.25s, transform 0.2s, box-shadow 0.25s;
+  box-shadow: 0 4px 14px rgba(249,115,22,0.35);
+  min-height: 44px;
+}
+
+.hero__cta:hover {
+  background: #EA580C;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(249,115,22,0.45);
+  text-decoration: none;
+}
+
+.hero__cta:active {
+  transform: translateY(0);
+}
+
+/* ========================================
+   共通セクションレイアウト
+   ======================================== */
+
+.section {
+  padding: 72px 20px;
+}
+
+.section--white {
+  background: #ffffff;
+}
+
+.section--gray {
+  background: #F8FAFC;
+}
+
+.section__inner {
+  max-width: 1080px;
+  margin: 0 auto;
+}
+
+.section__title {
+  font-size: 32px;
+  color: #1E3A5F;
+  text-align: center;
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+
+.section__subtitle {
+  font-size: 15px;
+  color: #64748B;
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.section__title + .feature-cards,
+.section__title + .article-grid,
+.section__title + .tag-list,
+.section__title + .product-grid {
+  margin-top: 48px;
+}
+
+/* ========================================
+   特徴カード（このサイトでわかること）
+   ======================================== */
+
+.feature-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+}
+
+.feature-card {
+  text-align: center;
+  padding: 40px 24px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  transition: box-shadow 0.25s, transform 0.25s;
+}
+
+.feature-card:hover {
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+  transform: translateY(-4px);
+}
+
+.feature-card__icon {
+  margin: 0 auto 20px;
+  width: 64px;
+  height: 64px;
+}
+
+.feature-card__title {
+  font-size: 18px;
+  font-weight: bold;
+  color: #1E3A5F;
+  margin-bottom: 12px;
+}
+
+.feature-card__text {
+  font-size: 14px;
+  color: #475569;
+  line-height: 1.7;
+}
+
+/* ========================================
+   記事カードグリッド
+   ======================================== */
+
+.article-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+}
+
+.article-card {
+  display: block;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  transition: box-shadow 0.25s, transform 0.25s;
+  text-decoration: none;
+  color: inherit;
+}
+
+.article-card:hover {
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  transform: translateY(-4px);
+  text-decoration: none;
+}
+
+.article-card--coming-soon {
+  opacity: 0.75;
+  pointer-events: none;
+}
+
+.article-card__thumb {
+  width: 100%;
+  height: 180px;
+  overflow: hidden;
+  background: #E2E8F0;
+}
+
+.article-card__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.article-card__placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #EFF6FF;
+}
+
+.article-card__body {
+  padding: 20px;
+}
+
+.article-card__title {
+  font-size: 16px;
+  font-weight: bold;
+  color: #1E293B;
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.article-card__excerpt {
+  font-size: 14px;
+  color: #64748B;
+  line-height: 1.6;
+}
+
+/* ========================================
+   タグ（悩みで探す）
+   ======================================== */
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+}
+
+.tag {
+  display: inline-block;
+  padding: 10px 20px;
+  background: #EFF6FF;
+  color: #2563EB;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 50px;
+  border: 1px solid #BFDBFE;
+  transition: background-color 0.2s, color 0.2s, transform 0.2s;
+  text-decoration: none;
+}
+
+.tag:hover {
+  background: #2563EB;
+  color: white;
+  transform: translateY(-2px);
+  text-decoration: none;
+}
+
+/* ========================================
+   商品カード（アフィリエイト）
+   ======================================== */
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+}
+
+.product-card {
+  position: relative;
+  background: white;
+  border-radius: 16px;
+  padding: 32px 24px 24px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  text-align: center;
+  transition: box-shadow 0.25s, transform 0.25s;
+}
+
+.product-card:hover {
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+  transform: translateY(-4px);
+}
+
+.product-card__badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: #F1F5F9;
+  color: #64748B;
+  font-size: 11px;
+  font-weight: bold;
+  padding: 3px 10px;
+  border-radius: 4px;
+}
+
+.product-card__icon-wrap {
+  margin: 0 auto 16px;
+  width: 48px;
+  height: 48px;
+}
+
+.product-card__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.product-card__name {
+  font-size: 20px;
+  font-weight: bold;
+  color: #1E3A5F;
+  margin-bottom: 4px;
+}
+
+.product-card__sub {
+  font-size: 13px;
+  color: #64748B;
+  margin-bottom: 16px;
+}
+
+.product-card__body {
+  font-size: 14px;
+  color: #475569;
+  line-height: 1.7;
+  text-align: left;
+  margin-bottom: 16px;
+}
+
+.product-card__price {
+  font-size: 14px;
+  font-weight: bold;
+  color: #1E3A5F;
+  margin-bottom: 20px;
+}
+
+/* アフィリエイトボタン */
+.affiliate-btn {
+  display: inline-block;
+  padding: 14px 32px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: bold;
+  color: white;
+  text-align: center;
+  text-decoration: none;
+  transition: background-color 0.25s, transform 0.2s, box-shadow 0.25s;
+  min-height: 44px;
+}
+
+.affiliate-btn:hover {
+  transform: translateY(-2px);
+  text-decoration: none;
+}
+
+.affiliate-btn--orange {
+  background: #F97316;
+  box-shadow: 0 4px 12px rgba(249,115,22,0.3);
+}
+
+.affiliate-btn--orange:hover {
+  background: #EA580C;
+  box-shadow: 0 6px 18px rgba(249,115,22,0.4);
+}
+
+.affiliate-btn--blue { background: #3B82F6; }
+.affiliate-btn--red { background: #EF4444; }
+.affiliate-btn--green { background: #059669; }
+.affiliate-btn--amber { background: #D97706; }
+.affiliate-btn--purple { background: #7C3AED; }
+
+/* ========================================
+   フッター
+   ======================================== */
+
+.site-footer {
+  background: #1E293B;
+  color: #94A3B8;
+  padding: 48px 20px 32px;
+  font-size: 14px;
+}
+
+.site-footer__inner {
+  max-width: 1080px;
+  margin: 0 auto;
+}
+
+.site-footer__links {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+  margin-bottom: 40px;
+}
+
+.site-footer__heading {
+  font-size: 14px;
+  font-weight: bold;
+  color: #CBD5E1;
+  margin-bottom: 12px;
+}
+
+.site-footer__list li {
+  margin-bottom: 8px;
+}
+
+.site-footer__list a {
+  color: #94A3B8;
+  font-size: 13px;
+  transition: color 0.2s;
+}
+
+.site-footer__list a:hover {
+  color: #E2E8F0;
+  text-decoration: none;
+}
+
+.site-footer__bottom {
+  border-top: 1px solid #334155;
+  padding-top: 24px;
+  text-align: center;
+}
+
+.site-footer__pr {
+  font-size: 12px;
+  color: #64748B;
+  margin-bottom: 12px;
+  line-height: 1.6;
+}
+
+.site-footer__copyright {
+  font-size: 13px;
+  color: #94A3B8;
+}
+
+/* PR表記 */
+.pr-label {
+  display: inline-block;
+  background: #F1F5F9;
+  color: #64748B;
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  margin-bottom: 16px;
+}
+
+/* ========================================
+   記事ページ（既存スタイル維持）
+   ======================================== */
+
+.main-content {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 32px 20px 60px;
+}
+
+.article-header__img {
+  width: 100%;
+  border-radius: 12px;
+  margin-bottom: 24px;
+}
+
+.article h1 {
+  font-size: 26px;
+  line-height: 1.4;
+  color: #1E293B;
+  margin-bottom: 16px;
+}
+
+.article h2 {
+  font-size: 22px;
+  line-height: 1.4;
+  color: #1E3A5F;
+  margin-top: 48px;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #DBEAFE;
+}
+
+.article h3 {
+  font-size: 18px;
+  color: #334155;
+  margin-top: 32px;
+  margin-bottom: 12px;
+}
+
+.article p {
+  margin-bottom: 16px;
+  font-size: 16px;
+}
+
+.article hr {
+  border: none;
+  border-top: 1px solid #E2E8F0;
+  margin: 32px 0;
+}
+
+/* 注意・豆知識・ポイントボックス */
+.info-box {
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin: 20px 0;
+}
+
+.info-box--tip {
+  background: #EFF6FF;
+  border-left: 4px solid #3B82F6;
+}
+
+.info-box--warning {
+  background: #FEF3C7;
+  border-left: 4px solid #F59E0B;
+}
+
+.info-box--success {
+  background: #ECFDF5;
+  border-left: 4px solid #10B981;
+}
+
+.info-box--highlight {
+  background: #F0F9FF;
+  border: 2px solid #0EA5E9;
+  border-radius: 12px;
+}
+
+.info-box__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-weight: bold;
+}
+
+/* SVG図解 */
+.svg-chart {
+  width: 100%;
+  max-width: 800px;
+  margin: 20px auto;
+  display: block;
+}
+
+/* 関連記事 */
+.related-articles {
+  background: #F8FAFC;
+  border-radius: 12px;
+  padding: 24px;
+  margin-top: 40px;
+}
+
+.related-articles__title {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 12px;
+  color: #1E3A5F;
+}
+
+/* ========================================
+   モバイル対応
+   ======================================== */
+
+@media (max-width: 768px) {
+  /* ヘッダー：ハンバーガー表示 */
+  .hamburger {
+    display: flex;
+  }
+
+  .site-header__nav {
+    display: none;
+    position: absolute;
+    top: 60px;
+    left: 0;
+    right: 0;
+    background: #1E40AF;
+    flex-direction: column;
+    padding: 16px 20px;
+    gap: 0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+
+  .site-header__nav.is-open {
+    display: flex;
+  }
+
+  .site-header__nav a {
+    padding: 12px 0;
+    font-size: 15px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .site-header__nav a:last-child {
+    border-bottom: none;
+  }
+
+  /* ヒーロー */
+  .hero {
+    min-height: 420px;
+  }
+
+  .hero__title {
+    font-size: 24px;
+  }
+
+  .hero__description {
+    font-size: 15px;
+  }
+
+  .hero__cta {
+    font-size: 15px;
+    padding: 14px 36px;
+  }
+
+  /* セクション */
+  .section {
+    padding: 48px 16px;
+  }
+
+  .section__title {
+    font-size: 24px;
+  }
+
+  /* 特徴カード */
+  .feature-cards {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .feature-card {
+    padding: 28px 20px;
+  }
+
+  /* 記事カード */
+  .article-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  /* 商品カード */
+  .product-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .product-card {
+    padding: 24px 16px 20px;
+  }
+
+  /* フッター */
+  .site-footer__links {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  /* 記事ページ */
+  .article h1 {
+    font-size: 22px;
+  }
+
+  .article h2 {
+    font-size: 19px;
+  }
+
+  .affiliate-btn {
+    display: block;
+    text-align: center;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .feature-cards {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+
+  .article-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .product-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
