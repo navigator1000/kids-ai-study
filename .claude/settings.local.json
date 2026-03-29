@@ -18,7 +18,8 @@
       "Bash(grep -r \"href=\" /c/Users/81901/OneDrive/Desktop/affiliate-site/docs/articles/*.html)",
       "Bash(grep -n \"13歳\\\\|thirteen\" /c/Users/81901/OneDrive/Desktop/affiliate-site/docs/articles/*.html)",
       "Bash(ls -la /c/Users/81901/OneDrive/Desktop/affiliate-site/docs/*.html /c/Users/81901/OneDrive/Desktop/affiliate-site/docs/articles/*.html)",
-      "Bash(grep -n \"だ。\\\\|である。\\\\|だった。\\\\|であった。\" /c/Users/81901/OneDrive/Desktop/affiliate-site/docs/articles/*.html)"
+      "Bash(grep -n \"だ。\\\\|である。\\\\|だった。\\\\|であった。\" /c/Users/81901/OneDrive/Desktop/affiliate-site/docs/articles/*.html)",
+      "WebFetch(domain:images.unsplash.com)"
     ]
   }
 }

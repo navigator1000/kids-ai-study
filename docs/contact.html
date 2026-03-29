@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>お問い合わせ｜AI学習ナビ for Parents</title>
+  <meta name="description" content="AI学習ナビ for Parentsへのお問い合わせページです。サイトや記事の内容についてのご質問・ご意見をお寄せください。">
+  <meta property="og:title" content="お問い合わせ｜AI学習ナビ for Parents">
+  <meta property="og:description" content="AI学習ナビ for Parentsへのお問い合わせページです。サイトや記事の内容についてのご質問・ご意見をお寄せください。">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="ja_JP">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .contact-form {
+      max-width: 640px;
+      margin: 0 auto;
+    }
+    .form-group {
+      margin-bottom: 24px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 15px;
+      font-weight: bold;
+      color: #1E3A5F;
+      margin-bottom: 8px;
+    }
+    .form-group .required {
+      display: inline-block;
+      background: #EF4444;
+      color: white;
+      font-size: 11px;
+      font-weight: bold;
+      padding: 2px 6px;
+      border-radius: 3px;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+    .form-group input[type="text"],
+    .form-group input[type="email"],
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px 16px;
+      font-size: 16px;
+      font-family: inherit;
+      color: #1E293B;
+      background: #ffffff;
+      border: 1.5px solid #CBD5E1;
+      border-radius: 8px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #3B82F6;
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+    }
+    .form-group textarea {
+      min-height: 180px;
+      resize: vertical;
+    }
+    .form-group select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath fill='%2364748B' d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 40px;
+    }
+    .form-submit {
+      text-align: center;
+      margin-top: 32px;
+    }
+    .form-submit button {
+      display: inline-block;
+      background: #3B82F6;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      font-family: inherit;
+      padding: 16px 64px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.25s, transform 0.2s, box-shadow 0.25s;
+      box-shadow: 0 4px 12px rgba(59,130,246,0.3);
+      min-height: 44px;
+    }
+    .form-submit button:hover {
+      background: #2563EB;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(59,130,246,0.4);
+    }
+    .form-submit button:active {
+      transform: translateY(0);
+    }
+    .form-note {
+      font-size: 13px;
+      color: #64748B;
+      margin-top: 24px;
+      text-align: center;
+      line-height: 1.7;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ========== ヘッダー ========== -->
+  <header class="site-header">
+    <div class="site-header__inner">
+      <a href="index.html" class="site-header__logo">AI学習ナビ for Parents</a>
+      <button class="hamburger" id="js-hamburger" aria-label="メニューを開く" aria-expanded="false">
+        <span class="hamburger__line"></span>
+        <span class="hamburger__line"></span>
+        <span class="hamburger__line"></span>
+      </button>
+      <nav class="site-header__nav" id="js-nav">
+        <a href="index.html#popular-articles">記事一覧</a>
+        <a href="index.html#features">AIツール比較</a>
+        <a href="index.html#affiliate">通信教育比較</a>
+        <a href="contact.html">お問い合わせ</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <article class="article">
+      <h1>お問い合わせ</h1>
+      <p>AI学習ナビ for Parentsに関するご質問・ご意見・ご要望がございましたら、下記フォームよりお気軽にご連絡ください。内容を確認のうえ、折り返しご連絡いたします。</p>
+
+      <form action="#" method="POST" class="contact-form">
+        <div class="form-group">
+          <label for="name">お名前<span class="required">必須</span></label>
+          <input type="text" id="name" name="name" placeholder="例）山田 太郎" required>
+        </div>
+
+        <div class="form-group">
+          <label for="email">メールアドレス<span class="required">必須</span></label>
+          <input type="email" id="email" name="email" placeholder="例）example@email.com" required>
+        </div>
+
+        <div class="form-group">
+          <label for="category">お問い合わせ種別<span class="required">必須</span></label>
+          <select id="category" name="category" required>
+            <option value="" disabled selected>選択してください</option>
+            <option value="about-site">サイトについて</option>
+            <option value="about-article">記事の内容について</option>
+            <option value="about-service">掲載サービスについて</option>
+            <option value="other">その他</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="message">お問い合わせ内容<span class="required">必須</span></label>
+          <textarea id="message" name="message" placeholder="お問い合わせ内容をご記入ください" required></textarea>
+        </div>
+
+        <div class="form-submit">
+          <button type="submit">送信する</button>
+        </div>
+
+        <p class="form-note">※ いただいた個人情報は、お問い合わせへの対応にのみ使用いたします。<br>詳しくは<a href="privacy-policy.html">プライバシーポリシー</a>をご確認ください。</p>
+      </form>
+    </article>
+  </main>
+
+  <!-- ========== フッター ========== -->
+  <footer class="site-footer">
+    <div class="site-footer__inner">
+      <div class="site-footer__links">
+        <div class="site-footer__col">
+          <h4 class="site-footer__heading">サイトマップ</h4>
+          <ul class="site-footer__list">
+            <li><a href="index.html">トップページ</a></li>
+            <li><a href="index.html#popular-articles">記事一覧</a></li>
+            <li><a href="index.html#affiliate">おすすめ学習サービス</a></li>
+          </ul>
+        </div>
+        <div class="site-footer__col">
+          <h4 class="site-footer__heading">記事カテゴリ</h4>
+          <ul class="site-footer__list">
+            <li><a href="articles/ai-era-kids-learning-parents-guide.html">AI時代の学習ガイド</a></li>
+            <li><a href="index.html#features">AIツール比較</a></li>
+            <li><a href="index.html#concerns">悩み別で探す</a></li>
+          </ul>
+        </div>
+        <div class="site-footer__col">
+          <h4 class="site-footer__heading">インフォメーション</h4>
+          <ul class="site-footer__list">
+            <li><a href="privacy-policy.html">プライバシーポリシー</a></li>
+            <li><a href="disclaimer.html">免責事項</a></li>
+            <li><a href="contact.html">お問い合わせ</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="site-footer__bottom">
+        <p class="site-footer__pr">当サイトはアフィリエイトプログラムに参加しています。記事内のリンクを通じて商品を購入された場合、当サイトに紹介料が支払われることがあります。</p>
+        <p class="site-footer__copyright">&copy; 2026 AI学習ナビ for Parents</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    (function() {
+      var btn = document.getElementById('js-hamburger');
+      var nav = document.getElementById('js-nav');
+      if (!btn || !nav) return;
+      btn.addEventListener('click', function() {
+        var expanded = btn.getAttribute('aria-expanded') === 'true';
+        btn.setAttribute('aria-expanded', String(!expanded));
+        btn.classList.toggle('is-open');
+        nav.classList.toggle('is-open');
+      });
+      nav.querySelectorAll('a').forEach(function(link) {
+        link.addEventListener('click', function() {
+          btn.setAttribute('aria-expanded', 'false');
+          btn.classList.remove('is-open');
+          nav.classList.remove('is-open');
+        });
+      });
+    })();
+  </script>
+
+</body>
+</html>
