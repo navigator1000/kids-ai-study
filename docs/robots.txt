@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://navigator1000.github.io/kids-ai-study/sitemap.xml
