@@ -1,0 +1,10 @@
+{
+  "name": "トレンド・ブレイクアウト（日足・買いのみ）",
+  "assets": ["BTC", "ETH", "Gold"],
+  "rule": {"sma": 200, "breakout_days": 20, "stop_atr": 2.0, "target_R": 4.0, "hold_days": 40},
+  "risk_jpy": 10000,
+  "live_since": "2026-11-17",
+  "cost": {"BTC": 0.002, "ETH": 0.002, "Gold": 0.0005},
+  "split": {"BTC": "2023-01-01", "ETH": "2023-01-01", "Gold": "2016-01-01"},
+  "unseen_validation": "ルール選定に使っていない11銘柄（SOL, XRP, BNB, ADA, LTC, DOGE, 銀, S&P500, 日経平均, ドル円, 原油）でも全期間で検証：11銘柄すべてで期待値プラス（平均+0.41R）、10銘柄でランダム買い（平均+0.20R）を上回った。"
+}
