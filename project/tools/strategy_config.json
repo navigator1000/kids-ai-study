@@ -1,10 +1,22 @@
 {
   "name": "トレンド・ブレイクアウト（日足・買いのみ）",
-  "assets": ["BTC", "ETH", "Gold"],
-  "rule": {"sma": 200, "breakout_days": 20, "stop_atr": 2.0, "target_R": 4.0, "hold_days": 40},
+  "broker": "Vantage（アプリ）",
+  "rule": {"sma": 200, "breakout_days": 20, "target_R": 4.0},
+  "assets": {
+    "BTC": {"symbol": "BTCUSD", "hold_days": 40, "stop_atr": 2.0,
+            "contract": 1, "min_lot": 0.01, "lot_step": 0.01,
+            "swap_long_pct_year": 25.35, "swap_note": "アプリ表示 -25.0（年率%・360日割りで毎日付与、金曜は3日分）"},
+    "ETH": {"symbol": "ETHUSD", "hold_days": 40, "stop_atr": 2.0,
+            "contract": 1, "min_lot": 0.01, "lot_step": 0.01,
+            "swap_long_pct_year": 35.49, "swap_note": "アプリ表示 -35.0（年率%・360日割りで毎日付与、金曜は3日分）"},
+    "Gold": {"symbol": "XAUUSD", "hold_days": 5, "stop_atr": 1.0,
+             "contract": 100, "min_lot": 0.01, "lot_step": 0.01,
+             "swap_long_pct_year": 6.53, "swap_note": "アプリ表示 -69.21ポイント＝1ロット1晩 -$69.21（$3,869で年6.5%相当、水曜は3日分）"}
+  },
+  "swap_checked": "2026-11-18",
   "risk_jpy": 10000,
   "live_since": "2026-11-17",
   "cost": {"BTC": 0.002, "ETH": 0.002, "Gold": 0.0005},
   "split": {"BTC": "2023-01-01", "ETH": "2023-01-01", "Gold": "2016-01-01"},
-  "unseen_validation": "ルール選定に使っていない11銘柄（SOL, XRP, BNB, ADA, LTC, DOGE, 銀, S&P500, 日経平均, ドル円, 原油）でも全期間で検証：11銘柄すべてで期待値プラス（平均+0.41R）、10銘柄でランダム買い（平均+0.20R）を上回った。"
+  "unseen_validation": "最大40日版は、ルール選定に使っていない11銘柄（SOL, XRP, BNB, ADA, LTC, DOGE, 銀, S&P500, 日経平均, ドル円, 原油）でも全期間で検証済み：11銘柄すべてで期待値プラス（平均+0.41R、スワップ抜き）、10銘柄でランダム買い（平均+0.20R）を上回った。"
 }
