@@ -42,6 +42,14 @@ def usdjpy():
     return float(m["chart"]["result"][0]["meta"]["regularMarketPrice"])
 
 
+def rsi14(c):
+    """RSI(14)。読み方は rsi_lab.py の検証結果に合わせる（高い＝勢いが強い、低い＝弱い）。"""
+    d = np.diff(c, prepend=np.nan)
+    up = pd.Series(np.clip(d, 0, None)).ewm(alpha=1 / 14, adjust=False).mean()
+    dn = pd.Series(np.clip(-d, 0, None)).ewm(alpha=1 / 14, adjust=False).mean()
+    return float((100 - 100 / (1 + up / dn)).iloc[-1])
+
+
 def usd(x):
     return f"${x:,.0f}" if abs(x) >= 1000 else f"${x:,.2f}"
 
@@ -124,6 +132,10 @@ def main():
         print(f"## {spec['symbol']}（{NAMES[a]}）｜ 損切りATR×{spec['stop_atr']:g}・最大{spec['hold_days']}日")
         print(f"- 判定用の価格（{BASIS[a]}）: 確定終値 {usd(c)}（{P['t'][i]:%m/%d}足） / 現在値 {usd(px)}")
         print(f"- 200日線 {usd(sma)}（終値は{'上' if c > sma else '下'}） ｜ 直近20日高値 {usd(hh)} ｜ ATR(14) {usd(atr)}")
+        r = rsi14(P["c"])
+        tag = ("70以上＝上昇の勢いが強い（過去検証では、この後も上がりやすい）" if r >= 70 else
+               "30以下＝下落の勢いが強い（ここで買う逆張りは過去検証でマイナス）" if r <= 30 else "中立")
+        print(f"- RSI(14) {r:.0f}：{tag}")
         for x in just_closed:
             print(f"- **前日に決済**: {x['t']:%m/%d}の買い → {x['why']} {x['Rn']:+.2f}R"
                   + ("（期限到来：アプリで保有が残っていれば今朝決済）" if x["why"] == "時間切れ" else "（アプリの損切り/利確注文で決済済みのはず）"))
