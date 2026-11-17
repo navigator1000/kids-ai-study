@@ -68,6 +68,27 @@ def yahoo_daily(symbol):
     return df[~df.index.duplicated(keep="last")]
 
 
+def binance_klines(symbol, interval="1h", start="2017-08-01"):
+    """Binanceの足を古い順に全期間取得（確定足のみ）。"""
+    start_ms = int(pd.Timestamp(start).timestamp() * 1000)
+    rows = []
+    while True:
+        d = _get(f"https://data-api.binance.vision/api/v3/klines?symbol={symbol}"
+                 f"&interval={interval}&limit=1000&startTime={start_ms}")
+        if not d:
+            break
+        rows += d
+        if len(d) < 1000:
+            break
+        start_ms = d[-1][0] + 1
+    df = pd.DataFrame(rows).iloc[:, [0, 1, 2, 3, 4, 6]]
+    df.columns = ["t", "open", "high", "low", "close", "close_time"]
+    df = df.drop_duplicates("t")
+    df = df[df["close_time"].astype(float) < time.time() * 1000]
+    df["t"] = pd.to_datetime(df["t"], unit="ms")
+    return df.set_index("t")[["open", "high", "low", "close"]].astype(float)
+
+
 def load_all(cache_dir=None):
     out = {}
     for name, fn in (("BTC", lambda: binance_daily("BTCUSDT")),
