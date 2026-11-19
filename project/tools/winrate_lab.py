@@ -9,7 +9,9 @@
 出口: 損切り ATR(30分足)×s、利確は損切り幅の tR 倍、最大 H 本（30分足）。逆張りは「中央線に戻ったら決済」も。
 コスト: スプレッド往復（基本0.05%）、買いのスワップ年25%（保有時間で按分）、売りのスワップ0。
 評価: 前半（2018〜2022年）で選び、後半（2023年〜）とETHで確認。年別の損益でマイナスの年を数える。
-使い方: python3 project/tools/winrate_lab.py <キャッシュ（BTC_30m.csv, ETH_30m.csv）>
+使い方: python3 project/tools/winrate_lab.py <キャッシュ（BTC_30m.csv, ETH_30m.csv）> [手数料 or more]
+  more: 手数料ゼロとの比較、利確と損切りの比率、値幅ブレイク＋早めの利確を8銘柄で
+  longshort: 値幅ブレイクの買い・売り・両方を8銘柄で（年別）
 """
 import itertools
 import os
@@ -131,5 +133,137 @@ def main(cache, cost=0.0005):
     return rows
 
 
-if __name__ == "__main__":
+if __name__ == "__main__" and (len(sys.argv) < 3 or sys.argv[2] not in ("more", "longshort")):
     main(sys.argv[1], float(sys.argv[2]) if len(sys.argv) > 2 else 0.0005)
+
+
+# ---------------------------------------------------------------- 追加の確認
+def tradeoff(cache):
+    """(1) 手数料ゼロ／0.02%／0.05%での成績、(2) 利確と損切りの比率を変えたときの勝率と成績。"""
+    B = prep(os.path.join(cache, "BTC_30m.csv"))
+    print("== (1) 手数料を変えた場合（528通りのうち、前半と後半の両方でPF>1の数／前半の最高PF）")
+    for cost in (0.0, 0.0002, 0.0005):
+        both, best = 0, 0.0
+        for g in grid():
+            m = evaluate(simulate(B, g, cost))
+            if m:
+                both += m["前半"]["pf"] > 1 and m["後半"]["pf"] > 1
+                best = max(best, m["前半"]["pf"])
+        print(f"  手数料 往復{cost*100:.2f}%: 両方プラス {both}通り ／ 前半の最高PF {best:.2f}")
+    print("\n== (2) 利確と損切りの比率を変えた場合（RSI逆張り RSI2<10・買い・日足20日平均の上だけ、損切りATR×3・最大24時間、BTC全期間）")
+    for cost in (0.0, 0.0005):
+        for tR, mean_exit in ((0.33, False), (0.5, False), (1.0, False), (2.0, False), (None, True)):
+            g = ("RSI逆張り", 10, 20, 1, (3.0, tR, 48, mean_exit))
+            m = evaluate(simulate(B, g, cost))["全期間"]
+            ex = "中央線で決済" if mean_exit else f"利確=損切りの{tR:g}倍"
+            print(f"  手数料{cost*100:.2f}% {ex:14s}: 勝率{m['win']*100:3.0f}% 勝ち平均{m['avg_win']:.2f}R 負け平均{m['avg_loss']:.2f}R PF{m['pf']:.2f} マイナスの年{m['neg_years']}")
+
+
+def vbo_daily_tp(df, k, n, tp, cost, swap_night):
+    """値幅ブレイク（日足で計算）: 始値＋前日値幅×k で買い、利確 ATR×tp（なしは終値）で決済。損切りなし。"""
+    o, h, l, c = (df[x].to_numpy(float) for x in ("open", "high", "low", "close"))
+    pc = np.r_[np.nan, c[:-1]]
+    tr = np.nanmax(np.vstack([h - l, abs(h - pc), abs(l - pc)]), axis=0)
+    atr = pd.Series(tr).rolling(14).mean().shift(1).to_numpy()
+    rng = np.r_[np.nan, (h - l)[:-1]]
+    trig = o + k * rng
+    ok = (h >= trig) & ~np.isnan(atr) & ~np.isnan(rng) & (rng > 0)
+    if n:
+        ok &= o > pd.Series(c).rolling(n).mean().shift(1).to_numpy()
+    ex = c.copy()
+    if tp:
+        hit = h >= trig + tp * atr
+        ex = np.where(hit, trig + tp * atr, c)
+    R = (ex - trig) / atr - cost * trig / atr - swap_night * trig / atr
+    return pd.DataFrame({"t": df.index[ok], "R": R[ok]})
+
+
+def multi_vbo(cache):
+    """値幅ブレイク＋早めの利確を暗号資産8銘柄で。設定はBTC+ETHの前半だけで選び、後半と他の6銘柄で確認。"""
+    coins = {"BTC": 25.0, "ETH": 35.0, "SOL": 30.0, "XRP": 30.0, "BNB": 30.0, "ADA": 30.0, "LTC": 30.0, "DOGE": 30.0}
+    data = {}
+    for a in coins:
+        df = pd.read_csv(os.path.join(cache, f"{a}.csv"), index_col=0, parse_dates=True)
+        data[a] = df[(df[["open", "high", "low", "close"]] > 0).all(axis=1)]
+
+    def book(names, k, n, tp, cost=0.0005):
+        parts = [vbo_daily_tp(data[a], k, n, tp, cost, coins[a] / 36500).assign(asset=a) for a in names]
+        x = pd.concat(parts).sort_values("t")
+        return x[x.t >= pd.Timestamp(START)]
+
+    def m(x):
+        R = x.R.to_numpy()
+        yrs = max((x.t.iloc[-1] - x.t.iloc[0]).days / 365.25, 0.5)
+        y = x.groupby(x.t.dt.year).R.sum()
+        return dict(n_yr=len(R) / yrs, win=(R > 0).mean(), pf=R[R > 0].sum() / -R[R < 0].sum(), neg=[int(a) for a, v in y.items() if v < 0],
+                    aw=R[R > 0].mean(), al=-R[R < 0].mean(), worst_day=x.groupby("t").R.sum().min())
+
+    print("== (3) 値幅ブレイク＋早めの利確（BTC+ETH・前半）利確の幅で勝率と成績がどう変わるか（k=0.6・5日平均）")
+    for tp in (None, 1.2, 0.8, 0.5, 0.3):
+        x = book(["BTC", "ETH"], 0.6, 5, tp)
+        r = m(x[x.t < pd.Timestamp(TRAIN_END)])
+        print(f"  利確{'なし（その日の終値で決済）' if tp is None else f'ATR×{tp}'}: 勝率{r['win']*100:.0f}% 勝ち平均{r['aw']:.2f}R 負け平均{r['al']:.2f}R PF{r['pf']:.2f}")
+    rows = []
+    for k, n, tp in itertools.product((0.5, 0.6, 0.7, 0.8), (0, 5, 20), (None, 1.2, 0.8, 0.5, 0.3)):
+        x = book(["BTC", "ETH"], k, n, tp)
+        tr = m(x[x.t < pd.Timestamp(TRAIN_END)])
+        if tr["win"] >= 0.55:
+            rows.append(((k, n, tp), tr))
+    rows.sort(key=lambda r: r[1]["pf"], reverse=True)
+    print(f"\n  勝率55%以上（BTC+ETH・前半）の設定 {len(rows)}通り。前半PFの高い順に3つを確認:")
+    for (k, n, tp), tr in rows[:3]:
+        x_all = book(list(coins), k, n, tp)
+        te = book(["BTC", "ETH"], k, n, tp)
+        te = te[te.t >= pd.Timestamp(TRAIN_END)]
+        alts = book(["SOL", "XRP", "BNB", "ADA", "LTC", "DOGE"], k, n, tp)
+        a, b, c8 = m(te), m(alts), m(x_all)
+        print(f"  * k={k}・{n or 'なし'}日平均・利確{'なし' if tp is None else f'ATR×{tp}'}")
+        print(f"     BTC+ETH 前半: 年{tr['n_yr']:.0f}回 勝率{tr['win']*100:.0f}% PF{tr['pf']:.2f} ／ 後半: 年{a['n_yr']:.0f}回 勝率{a['win']*100:.0f}% PF{a['pf']:.2f} マイナスの年{a['neg'] or 'なし'}")
+        print(f"     他の6銘柄（全期間）: 年{b['n_yr']:.0f}回 勝率{b['win']*100:.0f}% PF{b['pf']:.2f} マイナスの年{b['neg'] or 'なし'}")
+        print(f"     8銘柄まとめて: 年{c8['n_yr']:.0f}回（1日{c8['n_yr']/365:.1f}回） 勝率{c8['win']*100:.0f}% PF{c8['pf']:.2f}"
+              f" マイナスの年{c8['neg'] or 'なし'} 最悪の1日{c8['worst_day']:.1f}R")
+
+
+if __name__ == "__main__" and len(sys.argv) > 2 and sys.argv[2] == "more":
+    tradeoff(sys.argv[1])
+    print()
+    multi_vbo(sys.argv[1])
+
+
+def vbo_daily_short(df, k, n, cost):
+    """値幅ブレイクの売り（日足）: 始値−前日値幅×k を割ったら売り、終値で決済。条件: 始値がn日平均より下。"""
+    o, h, l, c = (df[x].to_numpy(float) for x in ("open", "high", "low", "close"))
+    pc = np.r_[np.nan, c[:-1]]
+    tr = np.nanmax(np.vstack([h - l, abs(h - pc), abs(l - pc)]), axis=0)
+    atr = pd.Series(tr).rolling(14).mean().shift(1).to_numpy()
+    rng = np.r_[np.nan, (h - l)[:-1]]
+    trig = o - k * rng
+    ok = (l <= trig) & ~np.isnan(atr) & ~np.isnan(rng) & (rng > 0) & (trig > 0)
+    if n:
+        ok &= o < pd.Series(c).rolling(n).mean().shift(1).to_numpy()
+    R = (trig - c) / atr - cost * trig / atr
+    return pd.DataFrame({"t": df.index[ok], "R": R[ok]})
+
+
+def long_short(cache, k=0.8, n=5, cost=0.0005):
+    coins = {"BTC": 25.0, "ETH": 35.0, "SOL": 30.0, "XRP": 30.0, "BNB": 30.0, "ADA": 30.0, "LTC": 30.0, "DOGE": 30.0}
+    L, S = [], []
+    for a, sw in coins.items():
+        df = pd.read_csv(os.path.join(cache, f"{a}.csv"), index_col=0, parse_dates=True)
+        df = df[(df[["open", "high", "low", "close"]] > 0).all(axis=1)]
+        L.append(vbo_daily_tp(df, k, n, None, cost, sw / 36500))
+        S.append(vbo_daily_short(df, k, n, cost))
+    print(f"== (4) 値幅ブレイク 8銘柄（k={k}・{n}日平均・その日の終値で決済）年別の損益（R）")
+    books = {"買いだけ": pd.concat(L), "売りだけ": pd.concat(S), "買い＋売り": pd.concat(L + S)}
+    for name, x in books.items():
+        x = x[x.t >= pd.Timestamp(START)].sort_values("t")
+        R = x.R.to_numpy()
+        y = x.groupby(x.t.dt.year).R.sum()
+        yrs = (x.t.iloc[-1] - x.t.iloc[0]).days / 365.25
+        print(f"  {name:6s}: 年{len(R)/yrs:.0f}回（1日{len(R)/yrs/365:.1f}回） 勝率{(R > 0).mean()*100:.0f}% PF{R[R > 0].sum() / -R[R < 0].sum():.2f}"
+              f" 最悪の1日{x.groupby('t').R.sum().min():.1f}R")
+        print("          " + " ".join(f"{a}:{v:+.0f}" for a, v in y.items()))
+
+
+if __name__ == "__main__" and len(sys.argv) > 2 and sys.argv[2] == "longshort":
+    long_short(sys.argv[1])
