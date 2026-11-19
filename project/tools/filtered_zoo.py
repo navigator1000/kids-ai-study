@@ -57,9 +57,9 @@ def from_positions(df, pos, cost, swap):
             j = i
             while j + 1 < N and p[j + 1] == 1:
                 j += 1
-            if j + 1 >= N:
+            if j + 2 >= N:
                 break
-            d, e = i + 1, j + 1
+            d, e = i + 1, j + 2       # 終値で「持たない」に変わった（j+1）のを確認して、翌日（j+2）の始値で決済
             nights = max(e - d, 1)
             rows.append((df.index[d], df.index[e], (o[e] - o[d]) / atr[i] - cost * o[d] / atr[i] - swap * nights * o[d] / atr[i], nights))
             i = j + 1
