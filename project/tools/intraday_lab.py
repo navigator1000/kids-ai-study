@@ -11,6 +11,7 @@
 使い方: python3 project/tools/intraday_lab.py <キャッシュ用ディレクトリ（BTC_1h.csv, ETH_1h.csv）> [detail]
   detail: 値幅ブレイクの設定ずらし・年別・他の11銘柄での確認
   portfolio: BTCとETHの両方で取引した場合（損切りの有無・コスト別）
+  boundary: 1日の区切りの時刻を変えた場合／国内取引所の現物（スワップなし）の場合
 """
 import itertools
 import os
@@ -238,3 +239,47 @@ def portfolio(cache):
 
 if __name__ == "__main__" and len(sys.argv) > 2 and sys.argv[2] == "portfolio":
     portfolio(sys.argv[1])
+
+
+def day_matrix_shift(path, utc_hour):
+    """1日の区切りを UTC utc_hour 時にした日足行列（日本時間＝UTC+9）。"""
+    df = pd.read_csv(path, index_col=0, parse_dates=True)
+    df.index = df.index - pd.Timedelta(hours=utc_hour)
+    tmp = path + f".shift{utc_hour}.csv"
+    df.to_csv(tmp)
+    try:
+        return day_matrix(tmp)
+    finally:
+        os.remove(tmp)
+
+
+def boundary(cache):
+    """区切りの時刻を変えた場合と、国内取引所の現物（スワップなし・手数料高め）の場合。"""
+    global SWAP_LONG
+    print("== 1日の区切りを変えた場合（k=0.8、スプレッド往復0.05%＋スワップ1晩）PF 前半/後半/ETH")
+    for jst in (7, 9, 12, 18, 21, 23):
+        utc = (jst - 9) % 24
+        B, E = day_matrix_shift(os.path.join(cache, "BTC_1h.csv"), utc), day_matrix_shift(os.path.join(cache, "ETH_1h.csv"), utc)
+        cells = []
+        for n in (0, 5):
+            a, b = split(vbo(B, 1, 0.8, n, 3.0, 24, 0.0005))
+            e = vbo(E, 1, 0.8, n, 3.0, 24, 0.0005)
+            cells.append(f"平均{n or 'なし'}: {stats(a)['pf']:.2f}/{stats(b)['pf']:.2f}/{stats(e)['pf']:.2f}")
+        print(f"  日本時間{jst:2d}時区切り  " + "   ".join(cells))
+    print("\n== 国内取引所の現物を想定（スワップなし、手数料は往復で）k=0.8・損切りATR×3・日本時間9時区切り")
+    B, E = day_matrix(os.path.join(cache, "BTC_1h.csv")), day_matrix(os.path.join(cache, "ETH_1h.csv"))
+    keep, SWAP_LONG = SWAP_LONG, 0.0
+    try:
+        for cost in (0.001, 0.002, 0.003):
+            cells = []
+            for n in (0, 5):
+                a, b = split(vbo(B, 1, 0.8, n, 3.0, 24, cost))
+                e = vbo(E, 1, 0.8, n, 3.0, 24, cost)
+                cells.append(f"平均{n or 'なし'}: {stats(a)['pf']:.2f}/{stats(b)['pf']:.2f}/{stats(e)['pf']:.2f}")
+            print(f"  手数料 往復{cost*100:.1f}%  " + "   ".join(cells))
+    finally:
+        SWAP_LONG = keep
+
+
+if __name__ == "__main__" and len(sys.argv) > 2 and sys.argv[2] == "boundary":
+    boundary(sys.argv[1])
