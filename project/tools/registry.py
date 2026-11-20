@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """検証結果の記録（project/research/results.csv）。同じ「グループ＋名前」は上書きする。
+効率＝年平均÷最大の落ち込み。安定度＝月ごとの損益の平均÷ばらつき（年換算）。落ち込みは1回の出来事で決まるので、両方を見る。
 
 使い方（スクリプトから）:
     from registry import record, metrics_row
@@ -16,7 +17,7 @@ import pandas as pd
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "research"))
 PATH = os.path.join(ROOT, "results.csv")
 FIELDS = ["記録日", "グループ", "名前", "銘柄", "時間足", "期間", "コストの前提", "1回の量",
-          "年平均%", "最大の落ち込み%", "効率", "マイナスの年", "最悪の年%", "プラスの月%", "最長連続マイナス月",
+          "年平均%", "最大の落ち込み%", "効率", "安定度", "マイナスの年", "最悪の年%", "プラスの月%", "最長連続マイナス月",
           "高値回復の最長日数", "年の取引回数", "前半の年平均%", "後半の年平均%", "メモ"]
 SPLIT = pd.Timestamp("2023-01-01")
 
@@ -35,7 +36,9 @@ def _metrics(x):
     for u in (eq < peak - 1e-9):
         cur = cur + 1 if u else 0
         longest = max(longest, cur)
-    return dict(annual=x.sum() / yrs, dd=(peak - eq).max(), yearly=yearly, pos_m=(monthly > 0).mean(), neg_run=neg_run, longest=longest)
+    stab = monthly.mean() / monthly.std() * np.sqrt(12) if monthly.std() > 0 else np.nan
+    return dict(annual=x.sum() / yrs, dd=(peak - eq).max(), yearly=yearly, pos_m=(monthly > 0).mean(), neg_run=neg_run, longest=longest,
+                stab=stab)
 
 
 def metrics_row(daily, trades_per_year=np.nan):
@@ -46,6 +49,7 @@ def metrics_row(daily, trades_per_year=np.nan):
     neg = [int(y) for y, v in m["yearly"].items() if v < 0]
     return {"年平均%": round(m["annual"], 2), "最大の落ち込み%": round(m["dd"], 2),
             "効率": round(m["annual"] / m["dd"], 2) if m["dd"] > 0 else np.nan,
+            "安定度": round(m["stab"], 2),
             "マイナスの年": ",".join(str(y) for y in neg) or "なし", "最悪の年%": round(m["yearly"].min(), 2),
             "プラスの月%": round(m["pos_m"] * 100, 1), "最長連続マイナス月": m["neg_run"], "高値回復の最長日数": m["longest"],
             "年の取引回数": round(trades_per_year, 1) if trades_per_year == trades_per_year else "",
@@ -61,14 +65,24 @@ def record(**row):
     row.setdefault("1回の量", "ATR1本分の値動き＝資金の0.5%（単利）")
     df = pd.read_csv(PATH) if os.path.exists(PATH) else pd.DataFrame(columns=FIELDS)
     df = df[~((df["グループ"] == row["グループ"]) & (df["名前"] == row["名前"]))]
-    df = pd.concat([df, pd.DataFrame([{k: row.get(k, "") for k in FIELDS}])], ignore_index=True)
+    df = pd.concat([df, pd.DataFrame([{k: row.get(k, "") for k in FIELDS}])], ignore_index=True).reindex(columns=FIELDS)
     df.to_csv(PATH, index=False)
+
+
+def drop(group, tf=None):
+    """グループ（と時間足）が一致する行を消す。決済の計算方法などを見直して、検証をやり直す前に使う。"""
+    if not os.path.exists(PATH):
+        return 0
+    df = pd.read_csv(PATH)
+    hit = (df["グループ"] == group) & ((df["時間足"] == tf) if tf else True)
+    df[~hit].to_csv(PATH, index=False)
+    return int(hit.sum())
 
 
 def show(top=None):
     df = pd.read_csv(PATH)
     df = df.sort_values("効率", ascending=False)
-    cols = ["グループ", "名前", "年平均%", "最大の落ち込み%", "効率", "マイナスの年", "プラスの月%", "後半の年平均%"]
+    cols = ["グループ", "名前", "年平均%", "最大の落ち込み%", "効率", "安定度", "マイナスの年", "プラスの月%", "後半の年平均%"]
     print(df[cols].head(top).to_string(index=False) if top else df[cols].to_string(index=False))
 
 

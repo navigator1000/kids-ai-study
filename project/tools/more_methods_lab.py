@@ -6,7 +6,7 @@
   E グリッド取引（1時間足。一定間隔ごとに同じ量を買い、その間隔だけ上がったら売る）
   F ETH/BTC比率の平均回帰（zスコア±2で入り、±0.5か10日で決済）
   G 大きく動いた翌日（前日の値動きがATRの2倍以上：急落の翌日に買う／急騰の翌日に買う、当日決済）
-  H 値幅ブレイクの決済の工夫（1時間足：そのまま／損切りATR×3／建値に移す／高値から戻ったら決済／半日で決済）
+  （値幅ブレイクの決済の工夫は exit_combo_lab.py に移した。15分足まで使い、足の中の値動きの順番の扱いも見直した）
 共通: 1R＝ATR1本分＝資金の0.5%（単利）、Vantage CFD想定（往復0.05%、買いスワップ年25〜35%、売り0%）、含み損込み。
 使い方: python3 project/tools/more_methods_lab.py <キャッシュ（BTC.csv, ETH.csv, BTC_1h.csv, ETH_1h.csv）>
 """
@@ -19,7 +19,6 @@ from numba import njit
 
 HERE = __file__.rsplit("/", 1)[0]
 sys.path.insert(0, HERE)
-import intraday_lab as IL  # noqa: E402
 import portfolio_lab as PF  # noqa: E402
 from btceth_lab import ind, load, state  # noqa: E402
 from registry import metrics_row, record  # noqa: E402
@@ -46,7 +45,7 @@ def show(group, name, x, n=None, memo=""):
     r = metrics_row(x, n / yrs if n else np.nan)
     print(f"  {name:40s} 年{r['年平均%']:+6.1f}% 落込{r['最大の落ち込み%']:5.1f}% 効率{r['効率']:5.2f} マイナスの年 {r['マイナスの年']:22s}"
           f" プラスの月{r['プラスの月%']:4.0f}% ｜ 前半{r['前半の年平均%']:+.1f}%→後半{r['後半の年平均%']:+.1f}%")
-    record(グループ=group, 名前=name, 銘柄="BTC,ETH", 時間足="日足" if group not in ("グリッド", "値幅ブレイクの決済") else "1時間足", メモ=memo, **r)
+    record(グループ=group, 名前=name, 銘柄="BTC,ETH", 時間足="日足" if group != "グリッド" else "1時間足", メモ=memo, **r)
     return r
 
 
@@ -203,52 +202,6 @@ def big_day(I, a, kind, th=2.0):
     return pd.Series(np.nan_to_num(R), index=I["idx"]), int(np.nansum(sig))
 
 
-# ---------------------------------------------------------------- H 値幅ブレイクの決済の工夫（1時間足）
-def vbo_exits(cache, a, side, mode, k=0.8, strict=False):
-    D = IL.day_matrix(os.path.join(cache, f"{a}_1h.csv"))
-    O, H, L, C = D["M"]["open"], D["M"]["high"], D["M"]["low"], D["M"]["close"]
-    dO, atr, rng = D["dO"], D["atr"], D["rng"]
-    ok = ~np.isnan(atr) & ~np.isnan(rng) & ((dO - D["sma"][5]) * side > 0)
-    trig = dO + side * k * rng
-    cost = SPEC[a][0]
-    sw = (SPEC[a][1] if side == 1 else SPEC[a][2]) / 36500
-    R = np.zeros(len(dO))
-    for d in np.flatnonzero(ok):
-        hit = np.flatnonzero((H[d] >= trig[d]) if side == 1 else (L[d] <= trig[d]))
-        hit = hit[hit < 23]
-        if not len(hit):
-            continue
-        h0 = hit[0]
-        e = max(O[d, h0], trig[d]) if side == 1 else min(O[d, h0], trig[d])
-        A = atr[d]
-        stop = e - side * 3 * A if mode != "そのまま（当日終値）" else None
-        best, ex, overnight = e, None, True
-        last = 24 if mode != "半日で決済" else min(h0 + 12, 24)
-        for t in range(h0, last):
-            adv = L[d, t] if side == 1 else H[d, t]
-            if stop is not None and (adv - stop) * side <= 0:
-                ex = stop if t == h0 else (min(O[d, t], stop) if side == 1 else max(O[d, t], stop))
-                break
-            fav = H[d, t] if side == 1 else L[d, t]
-            if (fav - best) * side > 0:
-                best = fav
-            if mode == "建値に移す" and (best - e) * side >= 0.5 * A:
-                stop = e if (e - stop) * side > 0 else stop
-            if mode == "高値から戻ったら決済":
-                trail = best - side * 1.0 * A
-                if (trail - stop) * side > 0:
-                    stop = trail
-            # 厳しめ：損切りを動かした同じ1時間のうちに、その価格まで戻っていたら損切りにかかったとみなす（約定した最初の1時間は除く）
-            if strict and t > h0 and stop is not None and mode in ("建値に移す", "高値から戻ったら決済") and (adv - stop) * side <= 0:
-                ex = stop
-                break
-        if ex is None:
-            ex = C[d, last - 1]
-            overnight = last == 24
-        R[d] = side * (ex - e) / A - cost * e / A - (sw * e / A if overnight else 0)
-    return pd.Series(R, index=D["days"])
-
-
 def main(cache):
     btc = load(cache, "BTC")
     I = {a: ind(load(cache, a), btc) for a in ("BTC", "ETH")}
@@ -301,16 +254,6 @@ def main(cache):
             n[0] += nn
             return s
         show("大きく動いた翌日", lab, both(g), n[0])
-
-    print("\n==== H 値幅ブレイクの決済の工夫（1時間足・9時区切り・買い＋売り×0.5）")
-    for mode, strict in (("そのまま（当日終値）", False), ("損切りATR×3", False), ("建値に移す", False), ("建値に移す", True),
-                         ("高値から戻ったら決済", False), ("高値から戻ったら決済", True), ("半日で決済", False)):
-        x = None
-        for a in ("BTC", "ETH"):
-            s = vbo_exits(cache, a, 1, mode, strict=strict).add(0.5 * vbo_exits(cache, a, -1, mode, strict=strict), fill_value=0)
-            x = s if x is None else x.add(s, fill_value=0)
-        x.index = pd.DatetimeIndex(x.index)
-        show("値幅ブレイクの決済", f"値幅ブレイク：{mode}{'（厳しめの計算）' if strict else ''}", clip(x * RISK))
 
 
 if __name__ == "__main__":
