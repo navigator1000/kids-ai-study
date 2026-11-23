@@ -4,7 +4,8 @@
 
 使い方（スクリプトから）:
     from registry import record, metrics_row
-    record(group="分散", name="値幅ブレイク4時間帯", coins="BTC,ETH", timeframe="1時間足", **metrics_row(daily, trades_per_year=...))
+    record(グループ="分散", 計画ID="A11", 名前="値幅ブレイク4時間帯", 銘柄="BTC,ETH", 時間足="1時間足", **metrics_row(daily, trades_per_year=...))
+計画ID は計画書（plan.csv）のID。計画書より前の行は空。
 一覧: python3 project/tools/registry.py   （効率＝年平均÷最大の落ち込み の高い順）
 """
 import os
@@ -16,7 +17,7 @@ import pandas as pd
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "research"))
 PATH = os.path.join(ROOT, "results.csv")
-FIELDS = ["記録日", "グループ", "名前", "銘柄", "時間足", "期間", "コストの前提", "1回の量",
+FIELDS = ["記録日", "グループ", "計画ID", "名前", "銘柄", "時間足", "期間", "コストの前提", "1回の量",
           "年平均%", "最大の落ち込み%", "効率", "安定度", "マイナスの年", "最悪の年%", "プラスの月%", "最長連続マイナス月",
           "高値回復の最長日数", "年の取引回数", "前半の年平均%", "後半の年平均%", "メモ"]
 SPLIT = pd.Timestamp("2023-01-01")
