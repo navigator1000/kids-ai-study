@@ -4,7 +4,7 @@
 
 しくみ: registry の metrics_row を包んで、計算した毎日の損益とその数字を覚えておく。record が呼ばれたら、
 同じ数字（年平均・落ち込み・安定度・期間）を持つ損益を探して、その行の月ごとの損益として保存する。
-drop と record は何も書かない（results.csv は変わらない）。スクリプトは1つずつ別のプロセスで動かす
+drop と record は何も書かない（results.csv は変わらない）。plan.csv・plan.md も書かない。スクリプトは1つずつ別のプロセスで動かす
 （モジュールを読み込んだ時の設定が混ざらないように）。
 
 使い方: python3 project/tools/capture_series.py <キャッシュ> <モジュール名> [関数名（main）] <出力のJSON>
@@ -49,6 +49,10 @@ def record(**row):
 registry.metrics_row = metrics_row
 registry.record = record
 registry.drop = lambda group, tf=None: 0
+# 第1・2回のスクリプトは最後に plan.csv・plan.md へ結果を書くので、ここでは書かないようにする
+import plan_tool  # noqa: E402
+plan_tool.save = lambda *a, **k: None
+plan_tool.render = lambda *a, **k: None
 
 if __name__ == "__main__":
     cache, modname = sys.argv[1], sys.argv[2]
