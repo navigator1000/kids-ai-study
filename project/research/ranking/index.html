@@ -1,0 +1,632 @@
+<meta name="dash-one-writer">
+<meta name="dash-form" content="freeform">
+<style>
+  .rk { display: grid; gap: var(--cds-gap-xl); color: var(--color-fg); font-family: var(--font-anthropic-sans); }
+  .rk .rk-sec { display: grid; gap: var(--cds-gap-md); min-width: 0; }
+  .rk .rk-title { margin: 0; font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); line-height: 1.25; text-wrap: balance; }
+  .rk .rk-lead { margin: 0; max-width: 46em; line-height: 1.75; color: var(--color-fg-muted); }
+  .rk .rk-take { margin: 0; max-width: 46em; line-height: 1.75; }
+  .rk .rk-h { margin: 0; font-size: var(--cds-font-size-heading); font-weight: var(--cds-font-weight-medium); text-wrap: balance; }
+  .rk .rk-h3 { margin: 0; font-size: var(--cds-font-size-body); font-weight: var(--cds-font-weight-medium); }
+  .rk .rk-sub { margin: 0; max-width: 46em; font-size: var(--cds-font-size-caption); line-height: 1.7; color: var(--color-fg-muted); }
+  .rk .rk-controls { display: flex; flex-wrap: wrap; align-items: center; gap: var(--cds-gap-sm) var(--cds-gap-lg); }
+  .rk .rk-tabs { display: flex; flex-wrap: wrap; gap: var(--cds-gap-xs); }
+  .rk .rk-tab { font: inherit; font-size: var(--cds-font-size-caption); padding: 6px 14px; border-radius: 999px; border: 1px solid var(--color-border-line); background-color: var(--color-bg); color: var(--color-fg); cursor: pointer; }
+  .rk .rk-tab[aria-pressed="true"] { background-color: var(--color-fg); border-color: var(--color-fg); color: var(--color-bg); }
+  .rk .rk-tab:focus-visible, .rk .rk-card:focus-visible, .rk .rk-btn:focus-visible { outline: 2px solid var(--color-fg); outline-offset: 2px; }
+  .rk .rk-field { display: flex; align-items: center; gap: var(--cds-gap-xs); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .rk .rk-check { display: flex; align-items: center; gap: 6px; font-size: var(--cds-font-size-caption); cursor: pointer; }
+  .rk .rk-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: var(--cds-gap-md); }
+  .rk .rk-list-wrap { display: grid; gap: var(--cds-gap-md); min-width: 0; min-height: 120px; }
+  .rk .rk-card { display: grid; gap: var(--cds-gap-sm); align-content: start; min-width: 0; padding: var(--cds-pad-md); background-color: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); cursor: pointer; }
+  .rk .rk-card:hover { border-color: var(--color-fg-muted); }
+  .rk .rk-card-top { display: flex; align-items: baseline; gap: var(--cds-gap-sm); min-width: 0; }
+  .rk .rk-rank { flex: none; min-width: 1.8em; font-family: var(--font-anthropic-serif); font-size: var(--cds-font-size-heading); color: var(--color-fg-muted); font-variant-numeric: tabular-nums; }
+  .rk .rk-name-wrap { display: grid; gap: 2px; min-width: 0; }
+  .rk .rk-name { font-weight: var(--cds-font-weight-medium); line-height: 1.5; overflow-wrap: anywhere; }
+  .rk .rk-meta { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .rk .rk-note { margin: 0; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .rk .rk-chips { display: flex; flex-wrap: wrap; gap: var(--cds-gap-xs); }
+  .rk .rk-chip { padding: 1px 8px; border-radius: 999px; border: 1px solid var(--color-border-line); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); white-space: nowrap; }
+  .rk .rk-chip.is-cand { border-color: var(--color-fg); color: var(--color-fg); }
+  .rk .rk-chip.is-pass { border-color: var(--color-ok); color: var(--color-ok); }
+  .rk .rk-chip.is-warn { border-color: var(--color-warn); color: var(--color-warn); }
+  .rk .rk-nums { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--cds-gap-sm); }
+  .rk .rk-num { display: grid; gap: 2px; min-width: 0; }
+  .rk .rk-lab { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .rk .rk-val { font-weight: var(--cds-font-weight-medium); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .rk .is-bad { color: var(--color-bad); }
+  .rk .rk-spark-wrap { min-height: 44px; }
+  .rk .rk-spark { display: block; width: 100%; height: 44px; }
+  .rk .rk-btn { justify-self: start; font: inherit; padding: 8px 16px; border-radius: var(--cds-radius); border: 1px solid var(--color-border-line); background-color: var(--color-panel); color: var(--color-fg); cursor: pointer; }
+  .rk .rk-detail-body { display: grid; gap: var(--cds-gap-lg); min-width: 0; }
+  .rk .rk-panel { display: grid; gap: var(--cds-gap-sm); min-width: 0; padding: var(--cds-pad-lg); background-color: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); }
+  .rk .rk-text { margin: 0; max-width: 46em; line-height: 1.8; overflow-wrap: anywhere; }
+  .rk .rk-facts { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 140px), 1fr)); gap: var(--cds-gap-sm); margin: 0; }
+  .rk .rk-facts div { display: grid; gap: 2px; min-width: 0; }
+  .rk .rk-facts dt { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .rk .rk-facts dd { margin: 0; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+  .rk .rk-tablewrap { overflow-x: auto; min-width: 0; }
+  .rk .rk-table { width: 100%; border-collapse: collapse; font-size: var(--cds-font-size-caption); font-variant-numeric: tabular-nums; }
+  .rk .rk-table th, .rk .rk-table td { padding: 6px 8px; border-bottom: 1px solid var(--color-border-line); text-align: right; white-space: nowrap; }
+  .rk .rk-table th:first-child, .rk .rk-table td:first-child { text-align: left; white-space: normal; min-width: 6.5em; }
+  .rk .rk-table th { font-weight: var(--cds-font-weight-medium); color: var(--color-fg-muted); }
+  .rk .rk-table tr.is-sel td { font-weight: var(--cds-font-weight-medium); }
+  .rk .rk-table tr.is-link { cursor: pointer; }
+  .rk .rk-chart { position: relative; min-height: 200px; }
+  .rk .rk-chart svg { display: block; }
+  .rk .rk-axis text { fill: var(--cds-text-secondary); font-size: var(--cds-font-size-caption); font-family: var(--font-anthropic-sans); }
+  .rk .rk-tip { position: absolute; top: 0; pointer-events: none; padding: 6px 8px; background-color: var(--cds-surface-popover); border: 1px solid var(--cds-border); box-shadow: var(--cds-shadow-popover); border-radius: var(--cds-radius); font-size: var(--cds-font-size-caption); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .rk .rk-legend { display: flex; flex-wrap: wrap; gap: var(--cds-gap-md); margin: 0; padding: 0; list-style: none; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .rk .rk-sw { display: inline-block; width: 16px; height: 3px; margin-right: 6px; vertical-align: middle; border-radius: 2px; }
+  .rk .rk-years { display: grid; gap: 6px; }
+  .rk .rk-yr { display: grid; grid-template-columns: 3.6em minmax(0, 1fr) 4.6em; align-items: center; gap: var(--cds-gap-sm); font-size: var(--cds-font-size-caption); font-variant-numeric: tabular-nums; }
+  .rk .rk-yr-bar { position: relative; height: 12px; }
+  .rk .rk-yr-bar i { position: absolute; top: 0; bottom: 0; border-radius: 2px; }
+  .rk .rk-yr-axis { position: absolute; top: -3px; bottom: -3px; width: 1px; background-color: var(--cds-chart-reference); }
+  .rk .rk-yr-v { text-align: right; }
+  .rk .rk-notes { display: grid; gap: var(--cds-gap-sm); }
+  .rk .rk-notes summary { cursor: pointer; font-weight: var(--cds-font-weight-medium); }
+  .rk .rk-notes-body { display: grid; gap: var(--cds-gap-sm); margin-top: var(--cds-gap-sm); }
+  @media (prefers-reduced-motion: no-preference) {
+    .rk .rk-card { transition: border-color var(--cds-dur-slow) var(--cds-ease-out); }
+  }
+</style>
+
+<div class="rk" id="rk">
+  <header class="rk-sec" id="rk-head">
+    <h1 class="rk-title">BTC・ETH 検証ランキング</h1>
+    <p class="rk-lead">計画書の検証（第1〜6回）の結果を、同じ物差しで並べています。1回の量は「ATR1本分の値動き＝資金の0.5%」（単利）、コストはVantage CFD（往復0.05%・買いのスワップ年25〜35%・売り0%）、期間は2018年1月〜2026年11月です。並びは安定度（月の損益の平均÷ばらつき×√12）が基本で、高いほど毎月の成績がそろっています。</p>
+    <p class="rk-take" id="rk-take">選んだ期間で、候補のうち安定度が一番高いのは <b data-draw="top">—</b> です。</p>
+  </header>
+
+  <section class="rk-sec" id="rk-filters" aria-label="並べ方と期間">
+    <div class="rk-controls">
+      <div class="rk-tabs" role="group" aria-label="並べ替え">
+        <button type="button" class="rk-tab" id="rk-sort-stab" data-sort="stab" aria-pressed="true">安定度</button>
+        <button type="button" class="rk-tab" id="rk-sort-annual" data-sort="annual" aria-pressed="false">年平均</button>
+        <button type="button" class="rk-tab" id="rk-sort-dd" data-sort="dd" aria-pressed="false">落ち込みの小ささ</button>
+        <button type="button" class="rk-tab" id="rk-sort-eff" data-sort="eff" aria-pressed="false">効率</button>
+      </div>
+      <label class="rk-field" for="rk-period">期間
+        <select class="dash-select" id="rk-period">
+          <option value="all">全期間（2018〜2026年）</option>
+          <option value="h1">前半（2018〜2022年）</option>
+          <option value="h2">後半（2023年〜）</option>
+          <option value="r12">最近12か月</option>
+        </select>
+      </label>
+    </div>
+  </section>
+
+  <section class="rk-sec" id="rk-cands">
+    <h2 class="rk-h">候補の5つ</h2>
+    <p class="rk-sub">これまでの検証で残った形です。タップすると、ルールと年ごとの成績を見られます。</p>
+    <ul class="rk-grid dash-skeleton" data-draw="cands" data-source="logics items"></ul>
+  </section>
+
+  <section class="rk-sec" id="rk-rank">
+    <h2 class="rk-h">ランキング</h2>
+    <div class="rk-controls">
+      <label class="rk-field" for="rk-cat">分類
+        <select class="dash-select" id="rk-cat" data-draw="catsel" data-source="logics"></select>
+      </label>
+      <label class="rk-check" for="rk-best"><input type="checkbox" id="rk-best" checked>同じ計画は一番良い設定だけ</label>
+      <label class="rk-check" for="rk-basis"><input type="checkbox" id="rk-basis" checked>前提がそろったものだけ</label>
+      <label class="rk-check" for="rk-noloss"><input type="checkbox" id="rk-noloss">負けた年なしだけ</label>
+    </div>
+    <p class="rk-sub">「一番良い設定」は、同じ計画の中で前半（2018〜2022年）の安定度が一番高い設定です。後半の成績を見て選んでいないので、後半の数字が本当の確かめになります。「落ち込みの小ささ」の並びには、その期間にプラスだったものだけを入れています。</p>
+    <div class="rk-list-wrap dash-skeleton" data-draw="list" data-source="logics items"></div>
+  </section>
+
+  <section class="rk-sec" id="rk-detail" hidden>
+    <button type="button" class="rk-btn" id="rk-back">一覧に戻る</button>
+    <div class="rk-detail-body" data-draw="detail" data-source="logics items yearly"></div>
+  </section>
+
+  <details class="rk-notes" id="rk-notes">
+    <summary>数字の見方と注意</summary>
+    <div class="rk-notes-body">
+      <p class="rk-text"><b>安定度</b>：月ごとの損益の平均を、そのばらつきで割って√12をかけたもの。1を超えると、毎月の成績がかなりそろっています。前半・後半・最近12か月の安定度と落ち込みは月末の値で測るので、毎日で測る全期間の落ち込みより少し小さく出ます。</p>
+      <p class="rk-text"><b>年平均</b>：1回の量を資金の0.5%（ATR1本分の値動き）にした時の、1年あたりの損益（単利）。<b>落ち込み</b>は、含み損も入れた一番大きな下げ。<b>効率</b>は年平均÷落ち込み。</p>
+      <p class="rk-text"><b>偶然の目安</b>：A01と同じ回数だけ、時刻も向きもランダムに入って翌朝9時に決済すると、1,000回の年平均の中央値は <b data-draw="ref" data-source="refs" data-field="a_med" data-where="ref=coin">—</b>、一番良い回でも <b data-draw="ref" data-source="refs" data-field="a_best" data-where="ref=coin">—</b> でした。安定度の中央値は <b data-draw="ref" data-source="refs" data-field="s_med" data-where="ref=coin">—</b>、一番良い回は <b data-draw="ref" data-source="refs" data-field="s_best" data-where="ref=coin">—</b> です。これを大きく超えるものだけが、偶然では説明できない形です。</p>
+      <p class="rk-text"><b>注意</b>：後半（2023年〜）は検証の中で何度も見てきた期間で、完全な未知の期間ではありません。特にS4案は、全期間の結果を見た後に見つけた形です。本当の確かめは、これからの値動きで記録をとる前向きテストです。実際の売買では、約定の滑り、最小ロット（0.01枚）の丸め、スワップの変更、取引所ごとの価格の差で、ここの数字とずれます。どの数字も、売買をすすめるものではありません。</p>
+    </div>
+  </details>
+</div>
+
+<script>
+const S = (window.__rkState = window.__rkState || { sort: 'stab', period: 'all', cat: '', best: true, basis: true, noloss: false, limit: 30, sel: null, back: null });
+const FIELD = {
+  all: { stab: 'stab', annual: 'annual', dd: 'dd', eff: 'eff' },
+  h1: { stab: 's_h1', annual: 'a_h1', dd: 'dd_h1', eff: 'e_h1' },
+  h2: { stab: 's_h2', annual: 'a_h2', dd: 'dd_h2', eff: 'e_h2' },
+  r12: { stab: 's_r12', annual: 'a_r12', dd: 'dd_r12', eff: 'e_r12' }
+};
+const PERIOD = { all: '全期間', h1: '前半（〜2022年）', h2: '後半（2023年〜）', r12: '最近12か月' };
+const PSHORT = { all: '全期間', h1: '前半', h2: '後半', r12: '最近12か月' };
+const CANDS = ['A01', 'S1', 'S2', 'S4案', '国内現物S1'];
+const H2 = Date.UTC(2023, 0, 1);
+const LAB = { stab: '安定度', annual: '年平均', dd: '落ち込み', eff: '効率' };
+
+const num = (v) => (v === null || v === undefined || v === '' || Number.isNaN(Number(v)) ? null : Number(v));
+const signed = (v, d) => (v > 0 ? '+' : v < 0 ? '-' : '') + Math.abs(v).toFixed(d);
+const fPct = (v) => ((v = num(v)) === null ? '—' : signed(v, 1) + '%');
+const fTwo = (v) => ((v = num(v)) === null ? '—' : (v < 0 ? '-' : '') + Math.abs(v).toFixed(2));
+const fDd = (v) => ((v = num(v)) === null ? '—' : v.toFixed(1) + '%');
+const FMT = { stab: fTwo, annual: fPct, dd: fDd, eff: fTwo };
+
+function el(tag, cls, text) {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text !== undefined && text !== null) e.textContent = text;
+  return e;
+}
+function mark(e, src, field, where) {
+  e.setAttribute('data-source', src);
+  e.setAttribute('data-field', field);
+  if (where) e.setAttribute('data-where', where);
+  return e;
+}
+function okRows(id) {
+  const d = dash.data(id);
+  return d.status === 'ok' ? d.data : null;
+}
+function itemMap() {
+  const m = new Map();
+  (okRows('items') || []).forEach((r) => m.set(r.pid, r));
+  return m;
+}
+function series(r) {
+  if (!r || !r.m || !r.m0) return [];
+  const p = String(r.m0).split('-');
+  const y = Number(p[0]);
+  const mo = Number(p[1]) - 1;
+  return String(r.m).split(',').map((x, i) => ({ t: Date.UTC(y, mo + i, 1), v: Number(x) }));
+}
+function slice(s, per) {
+  if (per === 'h1') return s.filter((d) => d.t < H2);
+  if (per === 'h2') return s.filter((d) => d.t >= H2);
+  if (per === 'r12') return s.slice(-12);
+  return s;
+}
+function cumul(s) {
+  let c = 0;
+  return s.map((d) => ({ t: d.t, v: (c += d.v) }));
+}
+const shortCat = (c) => String(c || '').replace(/（.*?）/g, '');
+const monthText = (t) => { const d = new Date(t); return d.getUTCFullYear() + '年' + (d.getUTCMonth() + 1) + '月'; };
+
+function ready(box, ids, li) {
+  const st = ids.map((id) => dash.data(id).status);
+  if (st.every((s) => s === 'ok')) { box.classList.remove('dash-skeleton'); return true; }
+  if (st.some((s) => s === 'loading')) return false;
+  box.classList.remove('dash-skeleton');
+  if (st.some((s) => s === 'error' || s === 'missing')) box.replaceChildren(el(li ? 'li' : 'p', 'rk-sub', 'データを読み込めませんでした。ページを開き直してください。'));
+  return false;
+}
+
+function spark(wrap, pts, label) {
+  const W = 300, H = 44, P = 3;
+  const cum = cumul(pts).map((d) => d.v);
+  const lo = Math.min(0, d3.min(cum)), hi = Math.max(0, d3.max(cum));
+  const x = d3.scaleLinear().domain([0, Math.max(1, cum.length - 1)]).range([0, W]);
+  const y = d3.scaleLinear().domain([lo, hi === lo ? lo + 1 : hi]).range([H - P, P]);
+  const svg = d3.select(wrap).append('svg').attr('class', 'rk-spark').attr('viewBox', `0 0 ${W} ${H}`)
+    .attr('preserveAspectRatio', 'none').attr('role', 'img').attr('aria-label', label);
+  svg.append('line').attr('x1', 0).attr('x2', W).attr('y1', y(0)).attr('y2', y(0))
+    .style('stroke', 'var(--cds-chart-reference)').attr('vector-effect', 'non-scaling-stroke');
+  svg.append('path').attr('d', d3.area().x((d, i) => x(i)).y0(y(0)).y1((d) => y(d))(cum))
+    .style('fill', dash.colors[0]).style('fill-opacity', 0.14).style('stroke', 'none');
+  svg.append('path').attr('d', d3.line().x((d, i) => x(i)).y((d) => y(d))(cum))
+    .style('fill', 'none').style('stroke', dash.colors[0]).attr('stroke-width', 1.6).attr('vector-effect', 'non-scaling-stroke');
+}
+
+function card(r, it, rank, per) {
+  const F = FIELD[per];
+  const where = 'key=' + r.key;
+  const li = el('li', 'rk-card');
+  li.id = 'card-' + r.key;
+  li.tabIndex = 0;
+  li.setAttribute('role', 'button');
+  const title = r.cand ? r.cand + '：' + (r.cand_title || r.name) : r.name;
+  li.setAttribute('aria-label', (rank ? rank + '位 ' : '') + title + '。詳しい結果を開く');
+  const top = el('div', 'rk-card-top');
+  if (rank) top.append(el('span', 'rk-rank', String(rank)));
+  const nw = el('div', 'rk-name-wrap');
+  nw.append(el('span', 'rk-name', title));
+  nw.append(el('span', 'rk-meta', [r.pid, r.item, r.round].filter(Boolean).join('・')));
+  top.append(nw);
+  li.append(top);
+  const chips = el('div', 'rk-chips');
+  if (r.cand) chips.append(el('span', 'rk-chip is-cand', '候補'));
+  const cat = shortCat(r.cat);
+  if (cat && cat !== 'その他') chips.append(el('span', 'rk-chip', cat));
+  if (it && it.stage && it.stage !== '—' && it.stage !== '不合格') chips.append(el('span', 'rk-chip' + (it.stage === '3次合格' || it.stage === '合格' ? ' is-pass' : ''), it.stage));
+  if (!r.basis) chips.append(el('span', 'rk-chip is-warn', '前提が違う'));
+  if (r.mix) chips.append(el('span', 'rk-chip', '値幅ブレイクに足した形'));
+  if (r.ref && !r.cand) chips.append(el('span', 'rk-chip', '参考'));
+  if (r.cand === 'S4案') chips.append(el('span', 'rk-chip is-warn', '後から発見'));
+  if (chips.childNodes.length) li.append(chips);
+  if (r.cand_note) li.append(el('p', 'rk-note', r.cand_note));
+  const nums = el('div', 'rk-nums');
+  ['stab', 'annual', 'dd'].forEach((k) => {
+    const box = el('div', 'rk-num');
+    const v = num(r[F[k]]);
+    box.append(el('span', 'rk-lab', LAB[k]));
+    box.append(mark(el('span', 'rk-val' + (k !== 'dd' && v !== null && v < 0 ? ' is-bad' : ''), FMT[k](v)), 'logics', F[k], where));
+    nums.append(box);
+  });
+  const last = el('div', 'rk-num');
+  if (per === 'all') {
+    const n = num(r.neg_n);
+    last.append(el('span', 'rk-lab', '負けた年'));
+    last.append(mark(el('span', 'rk-val' + (n ? ' is-bad' : ''), n === null ? '—' : n === 0 ? 'なし' : n + '年'), 'logics', 'neg_n', where));
+  } else {
+    last.append(el('span', 'rk-lab', '効率'));
+    last.append(mark(el('span', 'rk-val', fTwo(r[F.eff])), 'logics', F.eff, where));
+  }
+  nums.append(last);
+  li.append(nums);
+  const pts = slice(series(r), per);
+  if (pts.length > 1) {
+    const w = el('div', 'rk-spark-wrap');
+    w.setAttribute('data-source', 'logics');
+    li.append(w);
+    spark(w, pts, r.name + 'の損益の積み上げ（' + PERIOD[per] + '）');
+  }
+  const open = () => openDetail(r.key);
+  li.addEventListener('click', open);
+  li.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
+  return li;
+}
+
+function showList(on) {
+  ['rk-filters', 'rk-cands', 'rk-rank'].forEach((id) => { const e = document.getElementById(id); if (e) e.hidden = !on; });
+  const d = document.getElementById('rk-detail');
+  if (d) d.hidden = on;
+}
+function openDetail(key) {
+  S.sel = key;
+  S.allSib = false;
+  S.back = S.back || key;
+  showList(false);
+  dash.draw('detail');
+  const h = document.getElementById('rk-detail');
+  if (h) h.scrollIntoView({ block: 'start' });
+}
+
+dash.calc('yearly', {
+  inputs: ['logics'],
+  title: '年ごとの損益',
+  description: '月ごとの損益（m の列）を暦年ごとに足したもの。資金に対する%（単利）',
+  fn: (logics) => {
+    const out = [];
+    logics.forEach((r) => {
+      if (!r.m || !r.m0) return;
+      const p = String(r.m0).split('-');
+      const y0 = Number(p[0]);
+      let mo = Number(p[1]) - 1;
+      const acc = new Map();
+      String(r.m).split(',').forEach((v) => {
+        const yy = y0 + Math.floor(mo / 12);
+        acc.set(yy, (acc.get(yy) || 0) + Number(v));
+        mo += 1;
+      });
+      acc.forEach((v, yy) => out.push({ key: r.key, year: yy, pnl: Math.round(v * 100) / 100 }));
+    });
+    return out;
+  }
+});
+
+dash.draw('top', (b) => {
+  const rows = okRows('logics');
+  if (!rows) { b.textContent = '—'; return; }
+  const F = FIELD[S.period];
+  const c = rows.filter((r) => r.cand && num(r[F.stab]) !== null).sort((a, z) => num(z[F.stab]) - num(a[F.stab]))[0];
+  if (!c) { b.textContent = '—'; return; }
+  b.replaceChildren(
+    document.createTextNode(c.cand + '（' + PSHORT[S.period] + 'の安定度 '),
+    mark(el('span', '', fTwo(c[F.stab])), 'logics', F.stab, 'key=' + c.key),
+    document.createTextNode('）')
+  );
+});
+
+dash.draw('ref', (b) => {
+  const rows = okRows('refs');
+  const f = b.getAttribute('data-field');
+  const w = String(b.getAttribute('data-where') || '').split('=');
+  const r = rows ? rows.find((x) => String(x[w[0]]) === w[1]) : null;
+  if (!r) { b.textContent = '—'; return; }
+  b.textContent = f.startsWith('a_') ? fPct(r[f]) : fTwo(r[f]);
+});
+
+dash.draw('catsel', (sel) => {
+  const rows = okRows('logics') || [];
+  const cats = Array.from(new Set(rows.map((r) => r.cat).filter(Boolean))).sort();
+  sel.replaceChildren(new Option('すべての分類', ''), ...cats.map((c) => new Option(shortCat(c), c)));
+  sel.value = S.cat;
+  sel.onchange = () => { S.cat = sel.value; S.limit = 30; dash.draw('list'); };
+});
+
+dash.draw('cands', (box) => {
+  if (!ready(box, ['logics', 'items'], true)) return;
+  const rows = okRows('logics');
+  const im = itemMap();
+  const by = new Map(rows.filter((r) => r.cand).map((r) => [r.cand, r]));
+  box.replaceChildren(...CANDS.filter((c) => by.has(c)).map((c) => card(by.get(c), im.get(by.get(c).pid), 0, S.period)));
+});
+
+dash.draw('list', (box) => {
+  if (!ready(box, ['logics', 'items'])) return;
+  const rows = okRows('logics');
+  const im = itemMap();
+  const F = FIELD[S.period];
+  const k = F[S.sort];
+  let xs = rows.filter((r) => (S.best ? (S.basis ? r.best : r.best_any) : (S.basis ? r.basis : true)));
+  if (S.cat) xs = xs.filter((r) => r.cat === S.cat);
+  if (S.noloss) xs = xs.filter((r) => num(r.neg_n) === 0);
+  if (S.sort === 'dd') xs = xs.filter((r) => num(r[F.annual]) !== null && num(r[F.annual]) > 0);
+  const dir = S.sort === 'dd' ? 1 : -1;
+  const has = xs.filter((r) => num(r[k]) !== null).sort((a, z) => dir * (num(a[k]) - num(z[k])));
+  const none = xs.filter((r) => num(r[k]) === null);
+  const all = has.concat(none);
+  const shown = all.slice(0, S.limit);
+  const ol = el('ol', 'rk-grid');
+  ol.setAttribute('aria-label', 'ランキング（' + LAB[S.sort] + '・' + PERIOD[S.period] + '）');
+  shown.forEach((r, i) => ol.append(card(r, im.get(r.pid), num(r[k]) === null ? 0 : i + 1, S.period)));
+  const parts = [];
+  if (!all.length) parts.push(el('p', 'rk-sub', '条件に合うものがありません。絞り込みを外すと表示されます。'));
+  parts.push(ol);
+  if (all.length > shown.length) {
+    const more = el('button', 'rk-btn', '次の30件を見る');
+    more.type = 'button';
+    more.id = 'rk-more';
+    more.addEventListener('click', () => { S.limit += 30; dash.draw('list'); });
+    parts.push(more);
+  }
+  box.replaceChildren(...parts);
+});
+
+function cumChart(box, r, a01) {
+  const s = cumul(series(r));
+  if (s.length < 2) { box.replaceChildren(el('p', 'rk-sub', 'この行は月ごとの損益が残っていないので、曲線はありません（積立や複利の行など）。')); return; }
+  const a = a01 && a01.key !== r.key ? cumul(series(a01)) : [];
+  const W = Math.max(260, Math.floor(box.clientWidth || 320));
+  const H = 220, m = { t: 12, r: 14, b: 26, l: 46 };
+  const both = s.concat(a);
+  const x = d3.scaleUtc().domain(d3.extent(both, (d) => d.t)).range([m.l, W - m.r]);
+  const y = d3.scaleLinear().domain([Math.min(0, d3.min(both, (d) => d.v)), Math.max(0, d3.max(both, (d) => d.v))]).nice(5).range([H - m.b, m.t]);
+  const svg = d3.select(box).append('svg').attr('width', W).attr('height', H).attr('viewBox', `0 0 ${W} ${H}`)
+    .attr('role', 'img').attr('aria-label', '損益の積み上げ。最後は' + fPct(s[s.length - 1].v) + (a.length ? '、A01は' + fPct(a[a.length - 1].v) : ''));
+  svg.append('g').selectAll('line').data(y.ticks(5)).join('line')
+    .attr('x1', m.l).attr('x2', W - m.r).attr('y1', (v) => y(v)).attr('y2', (v) => y(v)).style('stroke', 'var(--cds-chart-grid)');
+  svg.append('line').attr('x1', m.l).attr('x2', W - m.r).attr('y1', y(0)).attr('y2', y(0)).style('stroke', 'var(--cds-chart-reference)');
+  svg.append('g').attr('class', 'rk-axis').attr('transform', `translate(${m.l},0)`)
+    .call(d3.axisLeft(y).ticks(5).tickSize(0).tickPadding(6).tickFormat((v) => v + '%')).call((g) => g.select('.domain').remove());
+  svg.append('g').attr('class', 'rk-axis').attr('transform', `translate(0,${H - m.b})`)
+    .call(d3.axisBottom(x).ticks(W < 420 ? 4 : 8).tickSizeOuter(0).tickFormat(d3.utcFormat('%Y')))
+    .call((g) => g.selectAll('.domain, line').style('stroke', 'var(--cds-chart-axis)'));
+  const line = d3.line().x((d) => x(d.t)).y((d) => y(d.v));
+  if (a.length) svg.append('path').attr('d', line(a)).style('fill', 'none').style('stroke', 'var(--cds-chart-muted)').attr('stroke-width', 1.5);
+  svg.append('path').attr('d', line(s)).style('fill', 'none').style('stroke', dash.colors[0]).attr('stroke-width', 2);
+  const end = s[s.length - 1];
+  svg.append('circle').attr('cx', x(end.t)).attr('cy', y(end.v)).attr('r', 3.5).style('fill', dash.colors[0]);
+  const focus = svg.append('line').attr('y1', m.t).attr('y2', H - m.b).style('stroke', 'var(--cds-chart-axis)').attr('visibility', 'hidden');
+  const dot = svg.append('circle').attr('r', 3.5).style('fill', dash.colors[0]).attr('visibility', 'hidden');
+  const tip = el('div', 'rk-tip');
+  tip.hidden = true;
+  box.append(tip);
+  const bis = d3.bisector((d) => d.t).center;
+  const amap = new Map(a.map((d) => [d.t, d.v]));
+  svg.append('rect').attr('x', m.l).attr('y', m.t).attr('width', W - m.l - m.r).attr('height', H - m.t - m.b)
+    .style('fill', 'transparent').style('touch-action', 'pan-y')
+    .on('pointermove', (ev) => {
+      const px = d3.pointer(ev)[0];
+      const d = s[bis(s, x.invert(px))];
+      focus.attr('x1', x(d.t)).attr('x2', x(d.t)).attr('visibility', 'visible');
+      dot.attr('cx', x(d.t)).attr('cy', y(d.v)).attr('visibility', 'visible');
+      const av = amap.get(d.t);
+      tip.textContent = monthText(d.t) + '：' + fPct(d.v) + (av !== undefined ? '（A01 ' + fPct(av) + '）' : '');
+      tip.hidden = false;
+      const tw = tip.offsetWidth;
+      tip.style.left = Math.max(0, Math.min(W - tw, x(d.t) - tw / 2)) + 'px';
+    })
+    .on('pointerleave', () => { tip.hidden = true; focus.attr('visibility', 'hidden'); dot.attr('visibility', 'hidden'); });
+}
+
+function yearBars(box, r) {
+  const yd = dash.data('yearly');
+  const ys = yd.status === 'ok' ? yd.data.filter((d) => d.key === r.key).sort((a, z) => a.year - z.year) : [];
+  if (!ys.length) { box.replaceChildren(el('p', 'rk-sub', yd.status === 'loading' ? '計算しています。' : '年ごとの損益はありません。')); return; }
+  const lo = Math.min(0, d3.min(ys, (d) => d.pnl)), hi = Math.max(0, d3.max(ys, (d) => d.pnl));
+  const span = hi - lo || 1;
+  const zero = (-lo / span) * 100;
+  box.replaceChildren(...ys.map((d) => {
+    const row = el('div', 'rk-yr');
+    row.append(el('span', 'rk-lab', d.year + '年'));
+    const bar = el('span', 'rk-yr-bar');
+    const ax = el('span', 'rk-yr-axis');
+    ax.style.left = zero + '%';
+    const b = el('i');
+    const w = (Math.abs(d.pnl) / span) * 100;
+    b.style.left = (d.pnl >= 0 ? zero : zero - w) + '%';
+    b.style.width = w + '%';
+    b.style.backgroundColor = d.pnl >= 0 ? dash.colors[0] : 'var(--color-bad)';
+    bar.append(b, ax);
+    row.append(bar);
+    row.append(mark(el('span', 'rk-yr-v' + (d.pnl < 0 ? ' is-bad' : ''), fPct(d.pnl)), 'yearly', 'pnl', 'key=' + r.key + '&year=' + d.year));
+    return row;
+  }));
+}
+
+dash.draw('detail', (box) => {
+  if (!S.sel) { box.replaceChildren(); return; }
+  if (!ready(box, ['logics', 'items'])) return;
+  const rows = okRows('logics');
+  const r = rows.find((x) => x.key === S.sel);
+  if (!r) { box.replaceChildren(el('p', 'rk-sub', '見つかりませんでした。一覧に戻ってください。')); return; }
+  const it = itemMap().get(r.pid);
+  const a01 = rows.find((x) => x.cand === 'A01');
+  const where = 'key=' + r.key;
+
+  const head = el('div', 'rk-panel');
+  head.id = 'detail-head';
+  head.append(el('h2', 'rk-h', r.cand ? r.cand + '：' + (r.cand_title || r.name) : r.name));
+  head.append(el('p', 'rk-meta', [r.pid, r.item, r.round, shortCat(r.cat)].filter(Boolean).join('・') + (r.cand ? '（記録上の名前：' + r.name + '）' : '')));
+  if (r.cand_note) head.append(el('p', 'rk-note', r.cand_note));
+  const facts = el('dl', 'rk-facts');
+  const fact = (label, node) => { const d = el('div'); d.append(el('dt', '', label)); const v = el('dd'); v.append(node); d.append(v); facts.append(d); };
+  const nv = num(r.neg_n);
+  fact('負けた年', mark(el('span', nv ? 'is-bad' : '', nv === null ? '—' : nv === 0 ? 'なし' : String(r.neg_years || '').split(',').join('・')), 'logics', 'neg_years', where));
+  fact('最悪の年', mark(el('span', num(r.worst) < 0 ? 'is-bad' : '', fPct(r.worst)), 'logics', 'worst', where));
+  fact('プラスの月', mark(el('span', '', num(r.posm) === null ? '—' : num(r.posm).toFixed(0) + '%'), 'logics', 'posm', where));
+  fact('取引の回数', mark(el('span', '', num(r.trades) === null ? '—' : '年' + num(r.trades).toFixed(0) + '回'), 'logics', 'trades', where));
+  head.append(facts);
+
+  const met = el('div', 'rk-panel');
+  met.id = 'detail-metrics';
+  met.append(el('h3', 'rk-h3', '期間ごとの成績'));
+  const tw = el('div', 'rk-tablewrap');
+  const t = el('table', 'rk-table');
+  const hr = el('tr');
+  ['期間', '安定度', '年平均', '落ち込み', '効率'].forEach((h) => hr.append(el('th', '', h)));
+  const th = el('thead');
+  th.append(hr);
+  const tb = el('tbody');
+  ['all', 'h1', 'h2', 'r12'].forEach((p) => {
+    const F = FIELD[p];
+    const tr = el('tr');
+    tr.append(el('td', '', PERIOD[p]));
+    ['stab', 'annual', 'dd', 'eff'].forEach((k) => {
+      const v = num(r[F[k]]);
+      tr.append(mark(el('td', k !== 'dd' && v !== null && v < 0 ? 'is-bad' : '', FMT[k](v)), 'logics', F[k], where));
+    });
+    tb.append(tr);
+  });
+  t.append(th, tb);
+  tw.append(t);
+  met.append(tw);
+  met.append(el('p', 'rk-sub', '前半・後半・最近12か月の安定度と落ち込みは月末の値から。全期間の数字は毎日の損益から測っています。'));
+
+  const chart = el('div', 'rk-panel');
+  chart.id = 'detail-chart';
+  chart.append(el('h3', 'rk-h3', '損益の積み上げ（資金に対する%・単利）'));
+  const lg = el('ul', 'rk-legend');
+  const li1 = el('li');
+  const sw1 = el('span', 'rk-sw');
+  sw1.style.backgroundColor = dash.colors[0];
+  li1.append(sw1, document.createTextNode('この形'));
+  lg.append(li1);
+  if (a01 && a01.key !== r.key) {
+    const li2 = el('li');
+    const sw2 = el('span', 'rk-sw');
+    sw2.style.backgroundColor = 'var(--cds-chart-muted)';
+    li2.append(sw2, document.createTextNode('A01（値幅ブレイクの基本形）'));
+    lg.append(li2);
+  }
+  const cbox = el('div', 'rk-chart');
+  cbox.setAttribute('data-source', 'logics');
+  chart.append(lg, cbox);
+
+  const yrs = el('div', 'rk-panel');
+  yrs.id = 'detail-years';
+  yrs.append(el('h3', 'rk-h3', '年ごとの損益'));
+  const ybox = el('div', 'rk-years');
+  yrs.append(ybox);
+
+  const rule = el('div', 'rk-panel');
+  rule.id = 'detail-rule';
+  rule.append(el('h3', 'rk-h3', 'ルール'));
+  rule.append(el('p', 'rk-text', it ? it.rule + (it.setting ? '（調べた設定：' + it.setting + '）' : '') : '計画書の外の、確かめ用の行です。'));
+  if (it && it.result) {
+    rule.append(el('h3', 'rk-h3', '検証の結果（計画書のまとめ）'));
+    rule.append(el('p', 'rk-text', it.result));
+  }
+
+  const parts = [head, met, chart, yrs, rule];
+  const sib = rows.filter((x) => r.pid && x.pid === r.pid);
+  if (sib.length > 1) {
+    const oth = el('div', 'rk-panel');
+    oth.id = 'detail-others';
+    oth.append(el('h3', 'rk-h3', '同じ計画のほかの設定（前半の安定度の順）'));
+    const w2 = el('div', 'rk-tablewrap');
+    const t2 = el('table', 'rk-table');
+    t2.setAttribute('data-source', 'logics');
+    t2.setAttribute('data-row-key', 'key');
+    const h2r = el('tr');
+    [['name', '設定'], ['stab', '安定度'], ['s_h1', '前半'], ['s_h2', '後半'], ['annual', '年平均'], ['dd', '落ち込み']].forEach(([f, h]) => {
+      const c = el('th', '', h);
+      c.setAttribute('data-field', f);
+      h2r.append(c);
+    });
+    const th2 = el('thead');
+    th2.append(h2r);
+    const tb2 = el('tbody');
+    const sorted = sib.slice().sort((a, z) => (num(z.s_h1) ?? -99) - (num(a.s_h1) ?? -99));
+    const cut = S.allSib ? sorted.length : Math.min(sorted.length, 12);
+    sorted.slice(0, cut).forEach((x) => {
+      const tr = el('tr', x.key === r.key ? 'is-sel' : 'is-link');
+      tr.setAttribute('data-key', x.key);
+      tr.append(el('td', '', x.name));
+      tr.append(el('td', '', fTwo(x.stab)), el('td', '', fTwo(x.s_h1)), el('td', '', fTwo(x.s_h2)), el('td', num(x.annual) < 0 ? 'is-bad' : '', fPct(x.annual)), el('td', '', fDd(x.dd)));
+      if (x.key !== r.key) {
+        tr.tabIndex = 0;
+        tr.addEventListener('click', () => openDetail(x.key));
+        tr.addEventListener('keydown', (e) => { if (e.key === 'Enter') openDetail(x.key); });
+      }
+      tb2.append(tr);
+    });
+    t2.append(th2, tb2);
+    w2.append(t2);
+    oth.append(w2);
+    if (cut < sorted.length) {
+      const more = el('button', 'rk-btn', 'ほかの設定もすべて見る');
+      more.type = 'button';
+      more.addEventListener('click', () => { S.allSib = true; dash.draw('detail'); });
+      oth.append(more);
+    }
+    parts.push(oth);
+  }
+
+  const notes = el('div', 'rk-panel');
+  notes.id = 'detail-notes';
+  notes.append(el('h3', 'rk-h3', '前提とメモ'));
+  notes.append(el('p', 'rk-text', '期間：' + (r.period || '—') + '／足：' + (r.tf || '—') + '／コスト：' + (r.cost || '—') + '／1回の量：' + (r.size || '—')));
+  if (!r.basis) notes.append(el('p', 'rk-note', 'この行は前提（コスト・期間・銘柄）がほかと違うので、ランキングでは「前提がそろったものだけ」を外した時だけ並びます。'));
+  if (r.memo) notes.append(el('p', 'rk-text', r.memo));
+  parts.push(notes);
+
+  box.replaceChildren(...parts);
+  cumChart(cbox, r, a01);
+  yearBars(ybox, r);
+});
+
+document.querySelectorAll('.rk-tab[data-sort]').forEach((b) => {
+  b.addEventListener('click', () => {
+    S.sort = b.getAttribute('data-sort');
+    S.limit = 30;
+    document.querySelectorAll('.rk-tab[data-sort]').forEach((x) => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
+    dash.draw('list');
+  });
+});
+document.querySelectorAll('#rk-period').forEach((p) => {
+  p.addEventListener('change', () => { S.period = p.value; S.limit = 30; dash.draw('top'); dash.draw('cands'); dash.draw('list'); });
+});
+[['rk-best', 'best'], ['rk-basis', 'basis'], ['rk-noloss', 'noloss']].forEach(([id, k]) => {
+  document.querySelectorAll('#' + id).forEach((c) => c.addEventListener('change', () => { S[k] = c.checked; S.limit = 30; dash.draw('list'); }));
+});
+document.querySelectorAll('#rk-back').forEach((b) => {
+  b.addEventListener('click', () => {
+    const key = S.back;
+    S.sel = null;
+    S.back = null;
+    showList(true);
+    requestAnimationFrame(() => {
+      const c = key ? document.getElementById('card-' + key) : null;
+      const target = c || document.getElementById('rk-rank');
+      if (target) target.scrollIntoView({ block: 'center' });
+    });
+  });
+});
+</script>
