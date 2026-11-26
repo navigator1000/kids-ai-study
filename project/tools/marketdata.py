@@ -6,6 +6,7 @@ Gold      : query1.finance.yahoo.com（GC=F 金先物）
 未確定の足（進行中の足）は取り除いて返す。
 """
 import json
+import sys
 import os
 import time
 import urllib.request
@@ -89,6 +90,27 @@ def binance_klines(symbol, interval="1h", start="2017-08-01"):
     return df.set_index("t")[["open", "high", "low", "close"]].astype(float)
 
 
+def binance_klines_full(symbol, interval="15m", start="2017-08-01"):
+    """Binanceの足を古い順に全期間取得（確定足のみ）。出来高・売買代金・取引回数・成行の買いの出来高も残す。"""
+    start_ms = int(pd.Timestamp(start).timestamp() * 1000)
+    rows = []
+    while True:
+        d = _get(f"https://data-api.binance.vision/api/v3/klines?symbol={symbol}"
+                 f"&interval={interval}&limit=1000&startTime={start_ms}")
+        if not d:
+            break
+        rows += d
+        if len(d) < 1000:
+            break
+        start_ms = d[-1][0] + 1
+    df = pd.DataFrame(rows).iloc[:, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]]
+    df.columns = ["t", "open", "high", "low", "close", "volume", "close_time", "quote_volume", "trades", "taker_buy"]
+    df = df.drop_duplicates("t")
+    df = df[df["close_time"].astype(float) < time.time() * 1000]
+    df["t"] = pd.to_datetime(df["t"], unit="ms")
+    return df.set_index("t")[["open", "high", "low", "close", "volume", "quote_volume", "trades", "taker_buy"]].astype(float)
+
+
 def load_all(cache_dir=None):
     out = {}
     for name, fn in (("BTC", lambda: binance_daily("BTCUSDT")),
@@ -104,3 +126,10 @@ def load_all(cache_dir=None):
             df.to_csv(path)
         out[name] = df
     return out
+
+
+if __name__ == "__main__" and len(sys.argv) >= 4 and sys.argv[1] == "klines":
+    # 使い方: python3 project/tools/marketdata.py klines <銘柄（BTCUSDT）> <保存先のCSV> [足（15m）]
+    df = binance_klines_full(sys.argv[2], sys.argv[4] if len(sys.argv) > 4 else "15m")
+    df.to_csv(sys.argv[3])
+    print("DONE", sys.argv[2], len(df), df.index[0], df.index[-1])
