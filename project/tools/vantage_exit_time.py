@@ -84,7 +84,8 @@ def trades(x, a, Lu, Ld, ok, last, wl, ws, cw, off, xbar, roll, sched, both=True
     xp = C[d + off[d], xbar[d] - 1]
     A = x["atr"][d]
     held = (j < roll[d]) & ((off[d] > 0) | (xbar[d] > roll[d]))
-    sw = np.where((sd == 1) & held, sched[x["idx"][d].dayofweek.to_numpy()] * SWD[a] * e / A, 0.0)
+    wd = x["wd"] if "wd" in x else x["idx"].dayofweek.to_numpy()   # スワップの日数を決める曜日（日本時間で入った日）
+    sw = np.where((sd == 1) & held, sched[wd[d]] * SWD[a] * e / A, 0.0)
     R = sd * (xp - e) / A - COST * e / A - sw
     return pd.DataFrame(dict(coin=a, d=d, side=sd, w=np.where(sd == 1, wl, ws), cw=cw, R=R, sw=sw, wk=off[d] > 0))
 
