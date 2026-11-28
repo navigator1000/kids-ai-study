@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """検証の計画書を扱う道具。正本は project/research/plan.csv（1行1パターン）。plan.md の一覧はここで作る。
 
-使い方:
+使い方（--plan daytrade をつけると、デイトレードの計画書 daytrade_plan.csv・daytrade_plan.md を扱う）:
   python3 project/tools/plan_tool.py md                  plan.md の一覧を plan.csv から作り直す
   python3 project/tools/plan_tool.py status              分類ごとの進み具合
   python3 project/tools/plan_tool.py next [件数]         次に検証する候補（優先「高」→「中」→「低」の「未」と「一部済」）
@@ -19,6 +19,15 @@ MARK = "<!-- ここから下は project/tools/plan_tool.py が plan.csv から�
 FIELDS = ["ID", "分類", "名前", "ルール", "調べる設定", "足", "性格", "優先", "状態", "必要なデータ", "結果"]
 STATES = ["済", "一部済", "未", "データ待ち", "見送り"]
 ORDER = {"高": 0, "中": 1, "低": 2}
+PLANS = {"main": ("plan.csv", "plan.md", FIELDS),
+         "daytrade": ("daytrade_plan.csv", "daytrade_plan.md", FIELDS[:6] + ["実行"] + FIELDS[6:])}
+
+
+def use(name):
+    """扱う計画書を切り替える（main：plan.csv、daytrade：daytrade_plan.csv）。"""
+    global CSV, MD, FIELDS
+    c, m, f = PLANS[name]
+    CSV, MD, FIELDS = os.path.join(ROOT, c), os.path.join(ROOT, m), list(f)
 
 
 def load():
@@ -65,7 +74,8 @@ def render(rows):
     for k in cats(rows):
         out += ["", f"### {k}", "", "| ID | 名前 | ルールの要点（調べる設定） | 優先 | 状態・結果 |", "|---|---|---|---|---|"]
         for r in (x for x in rows if x["分類"] == k):
-            rule = (f"〔{r['足']}〕" if r["足"] not in ("", "—") else "") + r["ルール"]
+            how = "・".join(v for v in (r.get("足", ""), r.get("実行", "")) if v and v != "—")
+            rule = (f"〔{how}〕" if how else "") + r["ルール"]
             if r["調べる設定"] not in ("", "—"):
                 rule += f"（{r['調べる設定']}）"
             st = r["状態"]
@@ -79,11 +89,15 @@ def render(rows):
 
 
 def main(argv):
+    if "--plan" in argv:
+        i = argv.index("--plan")
+        use(argv[i + 1])
+        argv = argv[:i] + argv[i + 2:]
     rows = load()
     cmd = argv[1] if len(argv) > 1 else "status"
     if cmd == "md":
         render(rows)
-        print(f"plan.md を作り直した（{len(rows)}件）")
+        print(f"{os.path.basename(MD)} を作り直した（{len(rows)}件）")
     elif cmd == "status":
         c = counts(rows)
         print(f"{len(rows)}件 ｜ " + " ".join(f"{s}{c[s]}" for s in STATES))
